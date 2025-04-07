@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>طراحی تیشرت زنانه | توسکا</title>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <style>
+    body {
+      background-color: #f7f3f0;
+      font-family: 'Vazirmatn', sans-serif;
+      direction: rtl;
+      text-align: center;
+    }
+    #viewer {
+      width: 100%;
+      height: 400px;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    select, input[type="color"], input[type="file"], input[type="text"] {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>طراحی تیشرت زنانه</h1>
+  <div id="viewer"></div>
+
+  <div class="controls">
+    <select>
+      <option>سایز را انتخاب کنید</option>
+      <option>کوچک (S)</option>
+      <option>متوسط (M)</option>
+      <option>بزرگ (L)</option>
+      <option>خیلی بزرگ (XL)</option>
+    </select>
+
+    <select>
+      <option>جنس پارچه را انتخاب کنید</option>
+      <option>نخ پنبه</option>
+      <option>ویسکوز</option>
+      <option>کتان</option>
+    </select>
+
+    <input type="color" title="انتخاب رنگ">
+    <input type="text" placeholder="متن دلخواه شما">
+    <input type="file" accept="image/*" title="انتخاب تصویر">
+  </div>
+
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, 400);
+    document.getElementById('viewer').appendChild(renderer.domElement);
+
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      'https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/tshirt.glb',
+      function (gltf) {
+        scene.add(gltf.scene);
+        gltf.scene.rotation.y = Math.PI; // چرخش برای نمایش بهتر
+        animate();
+      },
+      undefined,
+      function (error) {
+        console.error('خطا در بارگذاری مدل:', error);
+      }
+    );
+
+    camera.position.z = 3;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
