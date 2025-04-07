@@ -9,7 +9,7 @@
         body {
             font-family: 'Vazirmatn', sans-serif;
             text-align: center;
-            background-color: #f3f1e0; /* رنگ نسکافه‌ای روشن */
+            background-color: #f3f1e0; /* رنگ پس‌زمینه روشن */
             color: #3e2723; /* رنگ قهوه‌ای تیره */
         }
         h1 {
@@ -20,7 +20,7 @@
         .model-container {
             margin-top: 30px;
             width: 100%;
-            height: 500px; /* برای اندازه دادن به مدل */
+            height: 500px; /* اندازه مدل سه‌بعدی */
         }
         .options-container {
             margin-top: 50px;
@@ -39,6 +39,20 @@
         .btn:hover {
             background-color: #ff8c00; /* تغییر رنگ دکمه هنگام هاور */
         }
+        /* استایل برای دایره‌های رنگی */
+        .color-circle {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .color-option {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -47,16 +61,17 @@
 
     <!-- نمایش مدل سه‌بعدی تیشرت -->
     <div class="model-container">
-        <model-viewer src="https://toska-clothes.github.io/My_Toska/raw/refs/heads/main/tshirt.glb" alt="3D T-Shirt" auto-rotate camera-controls></model-viewer>
+        <model-viewer src="https://toska-clothes.github.io/My_Toska/raw/main/tshirt.glb" alt="3D T-Shirt" auto-rotate camera-controls></model-viewer>
     </div>
 
     <div class="options-container">
         <!-- سایز -->
         <label for="size">سایز:</label>
         <select id="size" class="btn">
-            <option value="small">کوچک</option>
-            <option value="medium">متوسط</option>
-            <option value="large">بزرگ</option>
+            <option value="small">S</option>
+            <option value="medium">M</option>
+            <option value="large">L</option>
+            <option value="xlarge">XL</option>
         </select>
 
         <!-- جنس پارچه -->
@@ -69,12 +84,12 @@
 
         <!-- رنگ -->
         <label for="color">رنگ:</label>
-        <select id="color" class="btn">
-            <option value="red">قرمز</option>
-            <option value="blue">آبی</option>
-            <option value="black">مشکی</option>
-            <option value="white">سفید</option>
-        </select>
+        <div class="color-option">
+            <div id="color-red" class="color-circle" style="background-color: red;" onclick="changeColor('red')"></div>
+            <div id="color-blue" class="color-circle" style="background-color: blue;" onclick="changeColor('blue')"></div>
+            <div id="color-black" class="color-circle" style="background-color: black;" onclick="changeColor('black')"></div>
+            <div id="color-white" class="color-circle" style="background-color: white;" onclick="changeColor('white')"></div>
+        </div>
 
         <!-- متن -->
         <label for="text">متن:</label>
@@ -91,26 +106,28 @@
         const modelViewer = document.querySelector('model-viewer');
         const sizeSelect = document.getElementById('size');
         const fabricSelect = document.getElementById('fabric');
-        const colorSelect = document.getElementById('color');
         const textInput = document.getElementById('text');
         const imageInput = document.getElementById('image');
+
+        // تغییر رنگ مدل سه‌بعدی
+        function changeColor(color) {
+            console.log('Selected color:', color);
+            // اینجا می‌توانید تغییرات رنگ مدل را پیاده‌سازی کنید (برای مثال با تغییر متریال مدل).
+        }
 
         // Add Event Listeners to options
         sizeSelect.addEventListener('change', updateDesign);
         fabricSelect.addEventListener('change', updateDesign);
-        colorSelect.addEventListener('change', updateDesign);
         textInput.addEventListener('input', updateDesign);
         imageInput.addEventListener('change', updateImage);
 
         function updateDesign() {
             const size = sizeSelect.value;
             const fabric = fabricSelect.value;
-            const color = colorSelect.value;
             const text = textInput.value;
 
-            console.log(`Selected size: ${size}, fabric: ${fabric}, color: ${color}, text: ${text}`);
+            console.log(`Selected size: ${size}, fabric: ${fabric}, text: ${text}`);
             // اینجا می‌توانید کدهایی برای اعمال تغییرات به مدل اضافه کنید.
-            // مثلا تغییر رنگ مدل بر اساس انتخاب کاربر
         }
 
         function updateImage() {
