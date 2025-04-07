@@ -1,86 +1,177 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>طراحی تیشرت زنانه | توسکا</title>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-  <style>
-    body {
-      background-color: #f7f3f0;
-      font-family: 'Vazirmatn', sans-serif;
-      direction: rtl;
-      text-align: center;
-    }
-    #viewer {
-      width: 100%;
-      height: 400px;
-    }
-    .controls {
-      margin-top: 20px;
-    }
-    select, input[type="color"], input[type="file"], input[type="text"] {
-      margin: 10px;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طراحی لباس - توسکا</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        #container {
+            width: 100%;
+            height: 500px;
+            margin-top: 50px;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        .control-group {
+            margin: 10px;
+        }
+
+        select, input {
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        button:hover {
+            background-color: #ff8c00;
+        }
+    </style>
 </head>
 <body>
-  <h1>طراحی تیشرت زنانه</h1>
-  <div id="viewer"></div>
 
-  <div class="controls">
-    <select>
-      <option>سایز را انتخاب کنید</option>
-      <option>کوچک (S)</option>
-      <option>متوسط (M)</option>
-      <option>بزرگ (L)</option>
-      <option>خیلی بزرگ (XL)</option>
-    </select>
+<h1>طراحی تیشرت</h1>
+<div id="container"></div>
 
-    <select>
-      <option>جنس پارچه را انتخاب کنید</option>
-      <option>نخ پنبه</option>
-      <option>ویسکوز</option>
-      <option>کتان</option>
-    </select>
+<div class="controls">
+    <div class="control-group">
+        <label for="color">انتخاب رنگ: </label>
+        <input type="color" id="color" value="#ffffff">
+    </div>
+    <div class="control-group">
+        <label for="size">انتخاب سایز: </label>
+        <select id="size">
+            <option value="S">کوچک</option>
+            <option value="M">متوسط</option>
+            <option value="L">بزرگ</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="fabric">انتخاب جنس پارچه: </label>
+        <select id="fabric">
+            <option value="Cotton">کتان</option>
+            <option value="Polyester">پلی استر</option>
+            <option value="Wool">پشم</option>
+        </select>
+    </div>
+    <div class="control-group">
+        <label for="text">متن دلخواه روی لباس: </label>
+        <input type="text" id="text" placeholder="متن دلخواه">
+    </div>
+    <div class="control-group">
+        <label for="image">انتخاب تصویر از گالری: </label>
+        <input type="file" id="image" accept="image/*">
+    </div>
+    <button id="download">دانلود تیشرت طراحی شده</button>
+</div>
 
-    <input type="color" title="انتخاب رنگ">
-    <input type="text" placeholder="متن دلخواه شما">
-    <input type="file" accept="image/*" title="انتخاب تصویر">
-  </div>
+<script>
+// Scene setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.getElementById('container').appendChild(renderer.domElement);
 
-  <script>
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.setSize(window.innerWidth, 400);
-    document.getElementById('viewer').appendChild(renderer.domElement);
+// Add 3D model (tshirt.glb)
+const loader = new THREE.GLTFLoader();
+let tshirtModel;
 
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-      'https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/tshirt.glb',
-      function (gltf) {
-        scene.add(gltf.scene);
-        gltf.scene.rotation.y = Math.PI; // چرخش برای نمایش بهتر
-        animate();
-      },
-      undefined,
-      function (error) {
-        console.error('خطا در بارگذاری مدل:', error);
-      }
-    );
+loader.load('https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/tshirt.glb', (gltf) => {
+    tshirtModel = gltf.scene;
+    tshirtModel.scale.set(0.5, 0.5, 0.5); // Scale model
+    scene.add(tshirtModel);
+});
 
-    camera.position.z = 3;
+// Lighting
+const light = new THREE.AmbientLight(0x404040);  // Ambient light
+scene.add(light);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+scene.add(directionalLight);
 
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
+// Camera positioning
+camera.position.z = 3;
+
+// Rotate and animate model
+function animate() {
+    requestAnimationFrame(animate);
+    if (tshirtModel) {
+        tshirtModel.rotation.y += 0.01; // Rotate the model for dynamic effect
     }
-  </script>
+    renderer.render(scene, camera);
+}
+animate();
+
+// Color change functionality
+document.getElementById('color').addEventListener('input', (event) => {
+    if (tshirtModel) {
+        tshirtModel.traverse((child) => {
+            if (child.isMesh) {
+                child.material.color.set(event.target.value);
+            }
+        });
+    }
+});
+
+// Size change functionality (Just a placeholder for future logic)
+document.getElementById('size').addEventListener('change', (event) => {
+    const size = event.target.value;
+    alert(`سایز انتخابی: ${size}`);
+});
+
+// Fabric type functionality (Just a placeholder for future logic)
+document.getElementById('fabric').addEventListener('change', (event) => {
+    const fabric = event.target.value;
+    alert(`جنس پارچه: ${fabric}`);
+});
+
+// Text on shirt
+document.getElementById('text').addEventListener('input', (event) => {
+    if (tshirtModel) {
+        // Here you can create a text object and apply it to the model
+        alert(`متن دلخواه: ${event.target.value}`);
+    }
+});
+
+// Image upload functionality
+document.getElementById('image').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const texture = new THREE.TextureLoader().load(e.target.result);
+        tshirtModel.traverse((child) => {
+            if (child.isMesh) {
+                child.material.map = texture;
+            }
+        });
+    };
+    reader.readAsDataURL(file);
+});
+
+// Download functionality (placeholder)
+document.getElementById('download').addEventListener('click', () => {
+    alert('در حال حاضر این امکان در دسترس نیست.');
+});
+</script>
+
 </body>
 </html>
