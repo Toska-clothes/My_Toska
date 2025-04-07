@@ -2,7 +2,8 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>لباس زنانه | توسکا</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لباس مردانه | توسکا</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -14,6 +15,17 @@
         h1 {
             font-size: 2.5rem;
             margin-top: 20px;
+        }
+        .btn-container {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
         }
         .btn {
             padding: 15px 40px;
@@ -32,11 +44,17 @@
     </style>
 </head>
 <body>
-    <h1>لباس زنانه</h1>
-    <p>یکی از مدل‌های زیر رو انتخاب کن:</p>
+    <h1>لباس مردانه</h1>
+    <p>انتخاب کنید که کدام مدل رو می‌خواهید طراحی کنید:</p>
     
-    <button class="btn" onclick="window.location.href='tshirt-women.html'">تیشرت</button>
-    <button class="btn" onclick="window.location.href='hoodie-women.html'">هودی</button>
-    <button class="btn" onclick="window.location.href='pants-women.html'">شلوار</button>
+    <div class="btn-container">
+        <div class="btn-row">
+            <button class="btn" onclick="window.location.href='tshirt-men.html'">تیشرت</button>
+            <button class="btn" onclick="window.location.href='hoodie-men.html'">هودی</button>
+        </div>
+        <div class="btn-row">
+            <button class="btn" onclick="window.location.href='pants-men.html'">شلوار</button>
+        </div>
+    </div>
 </body>
 </html>
