@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لباس زنانه | توسکا</title>
+    <title>طراحی تیشرت 3D | توسکا</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -17,33 +17,55 @@
             margin-top: 20px;
             color: #3e2723;
         }
-        .btn-container {
-            margin-top: 50px;
-        }
-        .btn {
-            padding: 15px 40px;
-            background-color: #f5a623; /* رنگ دکمه قهوه‌ای مایل به زرد */
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #ff8c00; /* تغییر رنگ دکمه هنگام هاور */
+        #container {
+            width: 100%;
+            height: 500px; /* ارتفاع مناسب برای نمایش مدل 3D */
+            margin-top: 30px;
         }
     </style>
+    <!-- بارگذاری کتابخانه Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/GLTFLoader.js"></script>
 </head>
 <body>
-    <h1>لباس زنانه</h1>
-    <p>انتخاب کنید که کدام مدل رو می‌خواهید طراحی کنید:</p>
-    
-    <div class="btn-container">
-        <button class="btn" onclick="window.location.href='tshirt-women.html'">تیشرت</button>
-        <button class="btn" onclick="window.location.href='hoodie.html'">هودی</button>
-        <button class="btn" onclick="window.location.href='pants.html'">شلوار</button>
-    </div>
+    <h1>طراحی تیشرت 3D</h1>
+    <p>در اینجا مدل سه بعدی تیشرت شما نمایش داده می‌شود:</p>
+    <div id="container"></div> <!-- کانتینری برای نمایش مدل 3D -->
+
+    <script>
+        // ایجاد صحنه (scene)
+        var scene = new THREE.Scene();
+        
+        // ایجاد دوربین (camera)
+        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        // ایجاد رندر (renderer)
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight); // تنظیم اندازه رندر
+        document.getElementById('container').appendChild(renderer.domElement); // اضافه کردن رندر به صفحه
+
+        // بارگذاری مدل 3D
+        var loader = new THREE.GLTFLoader();
+        loader.load('https://toska-clothes.github.io/My_Toska/raw/refs/heads/main/tshirt.glb', function(gltf) {
+            scene.add(gltf.scene); // اضافه کردن مدل به صحنه
+            gltf.scene.scale.set(0.5, 0.5, 0.5); // تغییر اندازه مدل (اختیاری)
+            gltf.scene.position.set(0, 0, 0); // تنظیم موقعیت مدل (اختیاری)
+        }, undefined, function(error) {
+            console.error(error); // در صورت بروز خطا
+        });
+
+        // موقعیت دوربین
+        camera.position.z = 5;
+
+        // تابع animate برای چرخش مدل
+        function animate() {
+            requestAnimationFrame(animate); // درخواست فریم بعدی
+            scene.rotation.x += 0.01; // چرخش مدل حول محور x
+            scene.rotation.y += 0.01; // چرخش مدل حول محور y
+            renderer.render(scene, camera); // رندر صحنه
+        }
+
+        animate(); // شروع انیمیشن
+    </script>
 </body>
 </html>
