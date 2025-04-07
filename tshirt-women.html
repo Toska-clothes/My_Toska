@@ -2,176 +2,59 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طراحی لباس - توسکا</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>طراحی تیشرت زنانه</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         body {
             font-family: 'Vazirmatn', sans-serif;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 0;
+            background-color: #f3f1e0;
+            color: #3e2723;
             text-align: center;
         }
-
-        #container {
+        model-viewer {
             width: 100%;
             height: 500px;
-            margin-top: 50px;
-        }
-
-        .controls {
             margin-top: 20px;
         }
-
-        .control-group {
+        .controls {
+            margin-top: 30px;
+        }
+        select, input[type="color"], input[type="text"], input[type="file"] {
             margin: 10px;
-        }
-
-        select, input {
-            padding: 10px;
+            padding: 8px;
             font-size: 1rem;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #f5a623;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        button:hover {
-            background-color: #ff8c00;
         }
     </style>
 </head>
 <body>
+    <h1>طراحی تیشرت زنانه</h1>
+    
+    <model-viewer src="https://github.com/Toska-clothes/My_Toska/raw/b9737aca52a42e300ef39481fd41cf740bf8a8e6/tshirt.glb" 
+                  alt="مدل تیشرت سه‌بعدی" 
+                  auto-rotate 
+                  camera-controls 
+                  background-color="#f3f1e0">
+    </model-viewer>
 
-<h1>طراحی تیشرت</h1>
-<div id="container"></div>
-
-<div class="controls">
-    <div class="control-group">
-        <label for="color">انتخاب رنگ: </label>
-        <input type="color" id="color" value="#ffffff">
-    </div>
-    <div class="control-group">
-        <label for="size">انتخاب سایز: </label>
-        <select id="size">
-            <option value="S">کوچک</option>
-            <option value="M">متوسط</option>
-            <option value="L">بزرگ</option>
+    <div class="controls">
+        <select>
+            <option>سایز S</option>
+            <option>سایز M</option>
+            <option>سایز L</option>
+            <option>سایز XL</option>
         </select>
-    </div>
-    <div class="control-group">
-        <label for="fabric">انتخاب جنس پارچه: </label>
-        <select id="fabric">
-            <option value="Cotton">کتان</option>
-            <option value="Polyester">پلی استر</option>
-            <option value="Wool">پشم</option>
+
+        <select>
+            <option>جنس پنبه‌ای</option>
+            <option>جنس نخ</option>
+            <option>جنس پلی‌استر</option>
         </select>
+
+        <input type="color" value="#ffffff">
+
+        <input type="text" placeholder="متن دلخواه...">
+
+        <input type="file" accept="image/*">
     </div>
-    <div class="control-group">
-        <label for="text">متن دلخواه روی لباس: </label>
-        <input type="text" id="text" placeholder="متن دلخواه">
-    </div>
-    <div class="control-group">
-        <label for="image">انتخاب تصویر از گالری: </label>
-        <input type="file" id="image" accept="image/*">
-    </div>
-    <button id="download">دانلود تیشرت طراحی شده</button>
-</div>
-
-<script>
-// Scene setup
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById('container').appendChild(renderer.domElement);
-
-// Add 3D model (tshirt.glb)
-const loader = new THREE.GLTFLoader();
-let tshirtModel;
-
-loader.load('https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/tshirt.glb', (gltf) => {
-    tshirtModel = gltf.scene;
-    tshirtModel.scale.set(0.5, 0.5, 0.5); // Scale model
-    scene.add(tshirtModel);
-});
-
-// Lighting
-const light = new THREE.AmbientLight(0x404040);  // Ambient light
-scene.add(light);
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-scene.add(directionalLight);
-
-// Camera positioning
-camera.position.z = 3;
-
-// Rotate and animate model
-function animate() {
-    requestAnimationFrame(animate);
-    if (tshirtModel) {
-        tshirtModel.rotation.y += 0.01; // Rotate the model for dynamic effect
-    }
-    renderer.render(scene, camera);
-}
-animate();
-
-// Color change functionality
-document.getElementById('color').addEventListener('input', (event) => {
-    if (tshirtModel) {
-        tshirtModel.traverse((child) => {
-            if (child.isMesh) {
-                child.material.color.set(event.target.value);
-            }
-        });
-    }
-});
-
-// Size change functionality (Just a placeholder for future logic)
-document.getElementById('size').addEventListener('change', (event) => {
-    const size = event.target.value;
-    alert(`سایز انتخابی: ${size}`);
-});
-
-// Fabric type functionality (Just a placeholder for future logic)
-document.getElementById('fabric').addEventListener('change', (event) => {
-    const fabric = event.target.value;
-    alert(`جنس پارچه: ${fabric}`);
-});
-
-// Text on shirt
-document.getElementById('text').addEventListener('input', (event) => {
-    if (tshirtModel) {
-        // Here you can create a text object and apply it to the model
-        alert(`متن دلخواه: ${event.target.value}`);
-    }
-});
-
-// Image upload functionality
-document.getElementById('image').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const texture = new THREE.TextureLoader().load(e.target.result);
-        tshirtModel.traverse((child) => {
-            if (child.isMesh) {
-                child.material.map = texture;
-            }
-        });
-    };
-    reader.readAsDataURL(file);
-});
-
-// Download functionality (placeholder)
-document.getElementById('download').addEventListener('click', () => {
-    alert('در حال حاضر این امکان در دسترس نیست.');
-});
-</script>
-
 </body>
 </html>
