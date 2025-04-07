@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لباس زنانه | توسکا</title>
+    <title>تیشرت زنانه | توسکا</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -17,7 +17,12 @@
             margin-top: 20px;
             color: #3e2723;
         }
-        .btn-container {
+        .model-container {
+            margin-top: 30px;
+            width: 100%;
+            height: 500px; /* برای اندازه دادن به مدل */
+        }
+        .options-container {
             margin-top: 50px;
         }
         .btn {
@@ -26,7 +31,7 @@
             color: white;
             border: none;
             border-radius: 10px;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
             margin: 10px;
             transition: background-color 0.3s;
@@ -37,13 +42,89 @@
     </style>
 </head>
 <body>
-    <h1>لباس زنانه</h1>
-    <p>انتخاب کنید که کدام مدل رو می‌خواهید طراحی کنید:</p>
-    
-    <div class="btn-container">
-        <button class="btn" onclick="window.location.href='tshirt-women.html'">تیشرت</button>
-        <button class="btn" onclick="window.location.href='hoodie-women.html'">هودی</button>
-        <button class="btn" onclick="window.location.href='pants-women.html'">شلوار</button>
+    <h1>تیشرت زنانه</h1>
+    <p>در اینجا می‌توانید تیشرت خود را طراحی کنید:</p>
+
+    <!-- نمایش مدل سه‌بعدی تیشرت -->
+    <div class="model-container">
+        <model-viewer src="https://toska-clothes.github.io/My_Toska/raw/refs/heads/main/tshirt.glb" alt="3D T-Shirt" auto-rotate camera-controls></model-viewer>
     </div>
+
+    <div class="options-container">
+        <!-- سایز -->
+        <label for="size">سایز:</label>
+        <select id="size" class="btn">
+            <option value="small">کوچک</option>
+            <option value="medium">متوسط</option>
+            <option value="large">بزرگ</option>
+        </select>
+
+        <!-- جنس پارچه -->
+        <label for="fabric">جنس پارچه:</label>
+        <select id="fabric" class="btn">
+            <option value="cotton">پنبه</option>
+            <option value="polyester">پلی استر</option>
+            <option value="linen">کتان</option>
+        </select>
+
+        <!-- رنگ -->
+        <label for="color">رنگ:</label>
+        <select id="color" class="btn">
+            <option value="red">قرمز</option>
+            <option value="blue">آبی</option>
+            <option value="black">مشکی</option>
+            <option value="white">سفید</option>
+        </select>
+
+        <!-- متن -->
+        <label for="text">متن:</label>
+        <input type="text" id="text" class="btn" placeholder="متن دلخواه خود را وارد کنید">
+
+        <!-- تصویر -->
+        <label for="image">تصویر:</label>
+        <input type="file" id="image" class="btn" accept="image/*">
+    </div>
+
+    <script type="module">
+        import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js';
+
+        const modelViewer = document.querySelector('model-viewer');
+        const sizeSelect = document.getElementById('size');
+        const fabricSelect = document.getElementById('fabric');
+        const colorSelect = document.getElementById('color');
+        const textInput = document.getElementById('text');
+        const imageInput = document.getElementById('image');
+
+        // Add Event Listeners to options
+        sizeSelect.addEventListener('change', updateDesign);
+        fabricSelect.addEventListener('change', updateDesign);
+        colorSelect.addEventListener('change', updateDesign);
+        textInput.addEventListener('input', updateDesign);
+        imageInput.addEventListener('change', updateImage);
+
+        function updateDesign() {
+            const size = sizeSelect.value;
+            const fabric = fabricSelect.value;
+            const color = colorSelect.value;
+            const text = textInput.value;
+
+            console.log(`Selected size: ${size}, fabric: ${fabric}, color: ${color}, text: ${text}`);
+            // اینجا می‌توانید کدهایی برای اعمال تغییرات به مدل اضافه کنید.
+            // مثلا تغییر رنگ مدل بر اساس انتخاب کاربر
+        }
+
+        function updateImage() {
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const image = new Image();
+                    image.src = event.target.result;
+                    modelViewer.appendChild(image); // اضافه کردن تصویر به مدل
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </body>
 </html>
