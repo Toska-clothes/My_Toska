@@ -1,87 +1,115 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8">
-  <title>تیشرت زنانه | توسکا</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      background-color: #f3f1e0;
-      color: #3e2723;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 20px;
-    }
-    model-viewer {
-      width: 100%;
-      max-width: 400px;
-      height: 400px;
-      margin: auto;
-    }
-    .controls {
-      margin-top: 30px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
-    }
-    .dropdown, .input-text {
-      width: 250px;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #aaa;
-      background-color: #fff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تیشرت زنانه | توسکا</title>
+    <script src="https://cdn.jsdelivr.net/npm/@google/model-viewer@2.2.1/dist/model-viewer.js"></script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f7f7f7;
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 20px;
+            font-size: 2rem;
+            color: #3e2723;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        model-viewer {
+            width: 80%;
+            height: 400px;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+        }
+
+        .controls {
+            margin-top: 20px;
+        }
+
+        select, input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            margin: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff8c00;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>طراحی تیشرت زنانه</h1>
+    <h1>طراحی تیشرت زنانه</h1>
 
-  <!-- مدل سه‌بعدی تیشرت -->
-  <model-viewer 
-    src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/98cbaffc2f5a260ca954df3081cb3b05a7354042/tshirt.glb"
-    alt="مدل تیشرت"
-    auto-rotate 
-    camera-controls 
-    background-color="#ffffff">
-  </model-viewer>
+    <div class="container">
+        <model-viewer 
+            src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/tshirt.glb"
+            alt="مدل تیشرت"
+            auto-rotate 
+            camera-controls 
+            background-color="#ffffff">
+        </model-viewer>
+    </div>
 
-  <!-- کنترل‌ها -->
-  <div class="controls">
-    <!-- سایز -->
-    <select class="dropdown">
-      <option>انتخاب سایز</option>
-      <option>S</option>
-      <option>M</option>
-      <option>L</option>
-      <option>XL</option>
-    </select>
+    <div class="controls">
+        <label for="size">سایز:</label>
+        <select id="size">
+            <option value="S">S</option>
+            <option value="M">M</option>
+            <option value="L">L</option>
+            <option value="XL">XL</option>
+        </select>
 
-    <!-- جنس پارچه -->
-    <select class="dropdown">
-      <option>جنس پارچه</option>
-      <option>نخی</option>
-      <option>پلی‌استر</option>
-      <option>ترکیبی</option>
-    </select>
+        <label for="fabric">جنس پارچه:</label>
+        <select id="fabric">
+            <option value="Cotton">پنبه</option>
+            <option value="Polyester">پلی استر</option>
+            <option value="Silk">ابریشم</option>
+        </select>
 
-    <!-- رنگ -->
-    <input class="dropdown" type="color" value="#ffffff">
+        <label for="color">رنگ:</label>
+        <select id="color">
+            <option value="Red">قرمز</option>
+            <option value="Blue">آبی</option>
+            <option value="Black">سیاه</option>
+            <option value="White">سفید</option>
+        </select>
 
-    <!-- متن دلخواه -->
-    <input class="input-text" type="text" placeholder="متن روی لباس">
+        <br>
 
-    <!-- آپلود تصویر -->
-    <input class="dropdown" type="file" accept="image/*">
-  </div>
+        <label for="text">متن دلخواه:</label>
+        <input type="text" id="text" placeholder="متن دلخواه خود را وارد کنید">
+
+        <br>
+
+        <button onclick="submitOrder()">ثبت سفارش</button>
+    </div>
+
+    <script>
+        function submitOrder() {
+            // اینجا می‌توانی عملکرد ثبت سفارش را اضافه کنی
+            alert("سفارش شما ثبت شد!");
+        }
+    </script>
 
 </body>
 </html>
