@@ -60,6 +60,15 @@
     .color-circle.selected {
       border: 3px solid #000;
     }
+    .text-hotspot {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      transform: translate(-50%, -50%);
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -145,7 +154,7 @@
     });
 
     // قابلیت تغییر مکان متن روی مدل
-    hoodieTextHotspot.addEventListener('click', (e) => {
+    modelViewer.addEventListener('click', (e) => {
       const bounds = modelViewer.getBoundingClientRect();
       const offsetX = e.clientX - bounds.left;
       const offsetY = e.clientY - bounds.top;
@@ -154,9 +163,13 @@
       const x = (offsetX / bounds.width) * 2 - 1;
       const y = (offsetY / bounds.height) * 2 - 1;
 
+      // محدود کردن موقعیت متن به نواحی قابل مشاهده روی هودی
+      const clampedX = Math.min(Math.max(x, -0.5), 0.5);  // محدود کردن به ناحیه وسط
+      const clampedY = Math.min(Math.max(y, -0.5), 0.5);  // محدود کردن به ناحیه وسط
+
       // به روز رسانی موقعیت متن
-      hoodieTextHotspot.style.transform = `translate(-50%, -50%) translate(${x * 50}%, ${y * 50}%)`;
+      hoodieTextHotspot.style.transform = `translate(-50%, -50%) translate(${clampedX * 50}%, ${clampedY * 50}%)`;
     });
   </script>
 </body>
-</html>
+          </html>
