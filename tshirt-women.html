@@ -1,147 +1,114 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تیشرت زنانه | توسکا</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            text-align: center;
-            background-color: #f3f1e0; /* رنگ پس‌زمینه روشن */
-            color: #3e2723; /* رنگ قهوه‌ای تیره */
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-top: 20px;
-            color: #3e2723;
-        }
-        .model-container {
-            margin-top: 30px;
-            width: 100%;
-            height: 500px; /* اندازه مدل سه‌بعدی */
-        }
-        .options-container {
-            margin-top: 50px;
-        }
-        .btn {
-            padding: 15px 40px;
-            background-color: #f5a623; /* رنگ دکمه قهوه‌ای مایل به زرد */
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #ff8c00; /* تغییر رنگ دکمه هنگام هاور */
-        }
-        /* استایل برای دایره‌های رنگی */
-        .color-circle {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 10px;
-            cursor: pointer;
-        }
-        .color-option {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تیشرت زنانه | توسکا</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background-color: #f3f1e0;
+      color: #3e2723;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+    }
+    .model-container {
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 20px;
+    }
+    .options-container {
+      margin-top: 30px;
+    }
+    .label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    select, input[type="text"], input[type="file"] {
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .color-picker {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .color-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      cursor: pointer;
+    }
+    .color-circle.selected {
+      border: 3px solid #000;
+    }
+  </style>
 </head>
 <body>
-    <h1>تیشرت زنانه</h1>
-    <p>در اینجا می‌توانید تیشرت خود را طراحی کنید:</p>
+  <h1>تیشرت زنانه</h1>
+  <p>مدل را مشاهده و ویژگی‌ها را انتخاب کنید:</p>
 
-    <!-- نمایش مدل سه‌بعدی تیشرت -->
-    <div class="model-container">
-        <model-viewer src="https://toska-clothes.github.io/My_Toska/raw/main/tshirt.glb" alt="3D T-Shirt" auto-rotate camera-controls></model-viewer>
+  <div class="model-container">
+    <model-viewer src="https://toska-clothes.github.io/My_Toska/tshirt.glb"
+                  alt="3D T-Shirt"
+                  auto-rotate
+                  camera-controls
+                  ar>
+    </model-viewer>
+  </div>
+
+  <div class="options-container">
+    <label class="label" for="size">سایز:</label>
+    <select id="size">
+      <option value="s">S (کوچک)</option>
+      <option value="m">M (متوسط)</option>
+      <option value="l">L (بزرگ)</option>
+      <option value="xl">XL (خیلی بزرگ)</option>
+    </select>
+
+    <label class="label">رنگ:</label>
+    <div class="color-picker">
+      <div class="color-circle" data-color="red" style="background-color: red;"></div>
+      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
+      <div class="color-circle" data-color="black" style="background-color: black;"></div>
+      <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
     </div>
 
-    <div class="options-container">
-        <!-- سایز -->
-        <label for="size">سایز:</label>
-        <select id="size" class="btn">
-            <option value="small">S</option>
-            <option value="medium">M</option>
-            <option value="large">L</option>
-            <option value="xlarge">XL</option>
-        </select>
+    <label class="label" for="text">متن دلخواه:</label>
+    <input type="text" id="text" placeholder="مثلاً: دختر قوی"/>
 
-        <!-- جنس پارچه -->
-        <label for="fabric">جنس پارچه:</label>
-        <select id="fabric" class="btn">
-            <option value="cotton">پنبه</option>
-            <option value="polyester">پلی استر</option>
-            <option value="linen">کتان</option>
-        </select>
+    <label class="label" for="image">آپلود تصویر:</label>
+    <input type="file" id="image" accept="image/*"/>
+  </div>
 
-        <!-- رنگ -->
-        <label for="color">رنگ:</label>
-        <div class="color-option">
-            <div id="color-red" class="color-circle" style="background-color: red;" onclick="changeColor('red')"></div>
-            <div id="color-blue" class="color-circle" style="background-color: blue;" onclick="changeColor('blue')"></div>
-            <div id="color-black" class="color-circle" style="background-color: black;" onclick="changeColor('black')"></div>
-            <div id="color-white" class="color-circle" style="background-color: white;" onclick="changeColor('white')"></div>
-        </div>
-
-        <!-- متن -->
-        <label for="text">متن:</label>
-        <input type="text" id="text" class="btn" placeholder="متن دلخواه خود را وارد کنید">
-
-        <!-- تصویر -->
-        <label for="image">تصویر:</label>
-        <input type="file" id="image" class="btn" accept="image/*">
-    </div>
-
-    <script type="module">
-        import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js';
-
-        const modelViewer = document.querySelector('model-viewer');
-        const sizeSelect = document.getElementById('size');
-        const fabricSelect = document.getElementById('fabric');
-        const textInput = document.getElementById('text');
-        const imageInput = document.getElementById('image');
-
-        // تغییر رنگ مدل سه‌بعدی
-        function changeColor(color) {
-            console.log('Selected color:', color);
-            // اینجا می‌توانید تغییرات رنگ مدل را پیاده‌سازی کنید (برای مثال با تغییر متریال مدل).
-        }
-
-        // Add Event Listeners to options
-        sizeSelect.addEventListener('change', updateDesign);
-        fabricSelect.addEventListener('change', updateDesign);
-        textInput.addEventListener('input', updateDesign);
-        imageInput.addEventListener('change', updateImage);
-
-        function updateDesign() {
-            const size = sizeSelect.value;
-            const fabric = fabricSelect.value;
-            const text = textInput.value;
-
-            console.log(`Selected size: ${size}, fabric: ${fabric}, text: ${text}`);
-            // اینجا می‌توانید کدهایی برای اعمال تغییرات به مدل اضافه کنید.
-        }
-
-        function updateImage() {
-            const file = imageInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const image = new Image();
-                    image.src = event.target.result;
-                    modelViewer.appendChild(image); // اضافه کردن تصویر به مدل
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-    </script>
+  <script>
+    const colorCircles = document.querySelectorAll('.color-circle');
+    colorCircles.forEach(circle => {
+      circle.addEventListener('click', () => {
+        colorCircles.forEach(c => c.classList.remove('selected'));
+        circle.classList.add('selected');
+        const selectedColor = circle.getAttribute('data-color');
+        console.log("رنگ انتخاب‌شده:", selectedColor);
+        // اینجا می‌تونی کد تغییر رنگ روی مدل سه‌بعدی بنویسی
+      });
+    });
+  </script>
 </body>
 </html>
