@@ -2,178 +2,91 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | توسکا</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
+  <title>هودی سه‌بعدی با متن</title>
   <style>
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      background-color: #f3f1e0;
-      color: #3e2723;
-      text-align: center;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-    }
-
-    .model-container {
-      margin: 20px auto;
-      max-width: 600px;
-      height: 500px;
-    }
-
-    model-viewer {
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      border-radius: 20px;
-    }
-
-    .options-container {
-      margin-top: 30px;
-    }
-
-    .label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
-
-    select,
-    input[type="text"],
-    input[type="file"] {
+    body { margin: 0; overflow: hidden; }
+    #textInput {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1;
+      font-size: 16px;
       padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-
-    .color-picker {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .color-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      cursor: pointer;
-    }
-
-    .color-circle.selected {
-      border: 3px solid #000;
     }
   </style>
 </head>
 <body>
-  <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده و ویژگی‌ها را انتخاب کنید:</p>
+  <input id="textInput" type="text" placeholder="متن دلخواهت رو بنویس" />
 
-  <div class="model-container">
-    <model-viewer src="https://toska-clothes.github.io/My-Toska/hoodie.glb"
-                  alt="3D Hoodie"
-                  auto-rotate
-                  camera-controls
-                  ar
-                  id="hoodieModel">
-    </model-viewer>
-  </div>
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+    import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FontLoader.js';
+    import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/TextGeometry.js';
 
-  <div class="options-container">
-    <label class="label" for="size">سایز:</label>
-    <select id="size">
-      <option value="s">S (کوچک)</option>
-      <option value="m">M (متوسط)</option>
-      <option value="l">L (بزرگ)</option>
-      <option value="xl">XL (خیلی بزرگ)</option>
-    </select>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf3f1e0);
 
-    <label class="label">رنگ:</label>
-    <div class="color-picker">
-      <div class="color-circle" data-color="red" style="background-color: red;"></div>
-      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
-      <div class="color-circle" data-color="black" style="background-color: black;"></div>
-      <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
-    </div>
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1.5, 3);
 
-    <label class="label" for="text">متن دلخواه:</label>
-    <input type="text" id="text" placeholder="مثلاً: دختر قوی" />
-    <label class="label" for="textColor">رنگ متن:</label>
-    <select id="textColor">
-      <option value="black">مشکی</option>
-      <option value="white">سفید</option>
-      <option value="red">قرمز</option>
-      <option value="blue">آبی</option>
-    </select>
-    <button id="addTextButton">اضافه کردن متن</button>
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-    <label class="label" for="image">آپلود تصویر:</label>
-    <input type="file" id="image" accept="image/*" />
-  </div>
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
 
-  <script>
-    const colorCircles = document.querySelectorAll('.color-circle');
-    const hoodieModel = document.querySelector('#hoodieModel');
-    const addTextButton = document.getElementById('addTextButton');
-    const textInput = document.getElementById('text');
-    const textColorSelect = document.getElementById('textColor');
-    const imageInput = document.getElementById('image');
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+    scene.add(light);
 
-    // تغییر رنگ مدل
-    colorCircles.forEach(circle => {
-      circle.addEventListener('click', () => {
-        colorCircles.forEach(c => c.classList.remove('selected'));
-        circle.classList.add('selected');
-        const selectedColor = circle.getAttribute('data-color');
-        // تغییر رنگ مدل سه‌بعدی (اگر این امکان در مدل شما موجود باشد)
-        console.log("رنگ انتخاب‌شده:", selectedColor);
-        hoodieModel.setAttribute('style', `background-color: ${selectedColor}`);
+    const loader = new GLTFLoader();
+    let hoodie;
+
+    loader.load('https://toska-clothes.github.io/My_Toska/hoodie.glb', function(gltf) {
+      hoodie = gltf.scene;
+      hoodie.scale.set(1, 1, 1);
+      hoodie.position.y = -1;
+      scene.add(hoodie);
+    });
+
+    // Load Font and Create Text
+    const fontLoader = new FontLoader();
+    let textMesh;
+
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function(font) {
+      const input = document.getElementById('textInput');
+      input.addEventListener('input', () => {
+        if (textMesh) scene.remove(textMesh);
+
+        const geometry = new TextGeometry(input.value, {
+          font: font,
+          size: 0.15,
+          height: 0.02,
+        });
+
+        const material = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        textMesh = new THREE.Mesh(geometry, material);
+        textMesh.position.set(-0.3, 0.3, 0.55); // روی سینه هودی
+        scene.add(textMesh);
+        if (hoodie) hoodie.add(textMesh); // بچسبونش به مدل
       });
     });
 
-    // اضافه کردن متن به مدل
-    addTextButton.addEventListener('click', () => {
-      const text = textInput.value;
-      const color = textColorSelect.value;
-
-      if (text) {
-        const textElement = document.createElement('div');
-        textElement.innerText = text;
-        textElement.style.position = 'absolute';
-        textElement.style.top = '50%';  // موقعیت متن روی مدل
-        textElement.style.left = '50%';
-        textElement.style.transform = 'translate(-50%, -50%)';
-        textElement.style.color = color;
-        hoodieModel.shadowRoot.appendChild(textElement);
-      }
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // آپلود و نمایش تصویر
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onloadend = () => {
-        const imgElement = document.createElement('img');
-        imgElement.src = reader.result;
-        imgElement.style.position = 'absolute';
-        imgElement.style.top = '60%';
-        imgElement.style.left = '50%';
-        imgElement.style.transform = 'translate(-50%, -50%)';
-        hoodieModel.shadowRoot.appendChild(imgElement);
-      };
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
 
-      if (file) {
-        reader.readAsDataURL(file);
-      }
-    });
+    animate();
   </script>
 </body>
 </html>
