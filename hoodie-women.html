@@ -2,7 +2,7 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>هودی زنانه | توسکا</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    input[type="text"] {
+    select, input[type="text"], input[type="file"] {
       padding: 10px;
       margin-bottom: 20px;
       border-radius: 8px;
@@ -60,20 +60,12 @@
     .color-circle.selected {
       border: 3px solid #000;
     }
-    .text-hotspot {
-      background: rgba(255, 255, 255, 0.8);
-      padding: 5px 10px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1rem;
-      transform: translate(-50%, -50%);
-      white-space: nowrap;
-    }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
   <p>مدل را مشاهده، رنگ و متن دلخواه را انتخاب کنید:</p>
+
   <div class="model-container">
     <model-viewer id="hoodieModel"
                   src="hoodie.glb"
@@ -85,11 +77,12 @@
                   shadow-intensity="1"
                   interaction-prompt="none">
       <!-- متن روی هودی -->
-      <div slot="hotspot-1" class="text-hotspot" id="textHotspot" data-position="0 1 0.5" data-normal="0 0 1">
+      <div slot="hotspot-1" class="text-hotspot" id="hoodieTextHotspot">
         <span id="hoodieText">متن نمونه</span>
       </div>
     </model-viewer>
   </div>
+
   <div class="options-container">
     <label class="label">رنگ:</label>
     <div class="color-picker">
@@ -98,6 +91,7 @@
       <div class="color-circle" data-color="black" style="background-color: black;"></div>
       <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
     </div>
+
     <label class="label">متن دلخواه روی هودی:</label>
     <input type="text" id="textInput" placeholder="مثلاً: توسکا" />
   </div>
@@ -107,8 +101,8 @@
     const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const hoodieText = document.getElementById("hoodieText");
-    const textHotspot = document.getElementById("textHotspot");
-    
+    const hoodieTextHotspot = document.getElementById("hoodieTextHotspot");
+
     const colorMap = {
       red: "#ff0000",
       blue: "#0000ff",
@@ -150,15 +144,18 @@
       hoodieText.textContent = textInput.value || "متن نمونه";
     });
 
-    // اضافه کردن رویداد لمس برای جابجایی متن
-    modelViewer.addEventListener('pointerdown', (event) => {
-      // دریافت موقعیت کلیک
-      const boundingBox = modelViewer.getBoundingClientRect();
-      const modelX = (event.clientX - boundingBox.left) / boundingBox.width * 2 - 1; // تبدیل به مختصات X در محدوده -1 تا 1
-      const modelY = (event.clientY - boundingBox.top) / boundingBox.height * 2 - 1; // تبدیل به مختصات Y در محدوده -1 تا 1
+    // قابلیت تغییر مکان متن روی مدل
+    hoodieTextHotspot.addEventListener('click', (e) => {
+      const bounds = modelViewer.getBoundingClientRect();
+      const offsetX = e.clientX - bounds.left;
+      const offsetY = e.clientY - bounds.top;
 
-      // بروزرسانی موقعیت متن در مدل
-      textHotspot.setAttribute("data-position", `${modelX} ${modelY} 0.5`);
+      // تبدیل مختصات به مقادیر نسبی مدل
+      const x = (offsetX / bounds.width) * 2 - 1;
+      const y = (offsetY / bounds.height) * 2 - 1;
+
+      // به روز رسانی موقعیت متن
+      hoodieTextHotspot.style.transform = `translate(-50%, -50%) translate(${x * 50}%, ${y * 50}%)`;
     });
   </script>
 </body>
