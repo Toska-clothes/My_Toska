@@ -185,4 +185,17 @@
         const widthInCm = (initialWidth + deltaX) / 37.795;
         const heightInCm = (initialHeight + deltaY) / 37.795;
         console.log(`عرض تصویر: ${widthInCm.toFixed(2)} سانتیمتر`);
-        console.log(`ارتفاع تصویر: ${heightInCm
+        console.log(`ارتفاع تصویر: ${heightInCm.toFixed(2)} سانتیمتر`);
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    });
+  </script>
+</body>
+</html>
