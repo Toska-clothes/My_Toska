@@ -63,24 +63,20 @@
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده و ویژگی‌ها را انتخاب کنید:</p>
+  <p>مدل را مشاهده و رنگ دلخواه را انتخاب کنید:</p>
   <div class="model-container">
-    <model-viewer src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/hoodie.glb"
-                  alt="3D Hoodie" 
-                  auto-rotate 
-                  camera-controls 
-                  ar>
+    <model-viewer id="hoodieModel"
+                  src="hoodie.glb"
+                  alt="3D Hoodie"
+                  auto-rotate
+                  camera-controls
+                  ar
+                  exposure="1"
+                  shadow-intensity="1">
     </model-viewer>
   </div>
-  <div class="options-container">
-    <label class="label" for="size">سایز:</label>
-    <select id="size">
-      <option value="s">S (کوچک)</option>
-      <option value="m">M (متوسط)</option>
-      <option value="l">L (بزرگ)</option>
-      <option value="xl">XL (خیلی بزرگ)</option>
-    </select>
 
+  <div class="options-container">
     <label class="label">رنگ:</label>
     <div class="color-picker">
       <div class="color-circle" data-color="red" style="background-color: red;"></div>
@@ -88,23 +84,46 @@
       <div class="color-circle" data-color="black" style="background-color: black;"></div>
       <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
     </div>
-
-    <label class="label" for="text">متن دلخواه:</label>
-    <input type="text" id="text" placeholder="مثلاً: قدرت در حرکت"/>
-
-    <label class="label" for="image">آپلود تصویر:</label>
-    <input type="file" id="image" accept="image/*"/>
   </div>
 
   <script>
-    const colorCircles = document.querySelectorAll('.color-circle');
+    const modelViewer = document.getElementById("hoodieModel");
+    const colorCircles = document.querySelectorAll(".color-circle");
+
+    const colorMap = {
+      red: "#ff0000",
+      blue: "#0000ff",
+      black: "#000000",
+      white: "#ffffff"
+    };
+
+    function hexToRgba(hex) {
+      const bigint = parseInt(hex.slice(1), 16);
+      const r = ((bigint >> 16) & 255) / 255;
+      const g = ((bigint >> 8) & 255) / 255;
+      const b = (bigint & 255) / 255;
+      return [r, g, b, 1]; // RGBA
+    }
+
+    async function changeColor(colorName) {
+      const hex = colorMap[colorName];
+      const rgba = hexToRgba(hex);
+
+      await modelViewer.updateComplete; // صبر می‌کنیم تا مدل لود بشه
+
+      const material = modelViewer.model.materials[0];
+      if (material) {
+        material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+      }
+    }
+
     colorCircles.forEach(circle => {
-      circle.addEventListener('click', () => {
-        colorCircles.forEach(c => c.classList.remove('selected'));
-        circle.classList.add('selected');
-        const selectedColor = circle.getAttribute('data-color');
-        console.log("رنگ انتخاب‌شده:", selectedColor);
-        // اینجا می‌تونی کد تغییر رنگ روی مدل سه‌بعدی بنویسی
+      circle.addEventListener("click", () => {
+        colorCircles.forEach(c => c.classList.remove("selected"));
+        circle.classList.add("selected");
+
+        const selectedColor = circle.getAttribute("data-color");
+        changeColor(selectedColor);
       });
     });
   </script>
