@@ -37,7 +37,7 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    select, input[type="text"], input[type="file"] {
+    select, input[type="text"] {
       padding: 10px;
       margin-bottom: 20px;
       border-radius: 8px;
@@ -68,23 +68,13 @@
       font-size: 1rem;
       transform: translate(-50%, -50%);
       white-space: nowrap;
-      cursor: move;
-    }
-    #lockButton {
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #795548;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      margin-bottom: 20px;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده، رنگ و متن دلخواه را انتخاب کنید:</p>
+  <p>برای تغییر موقعیت متن، روی مدل کلیک کنید:</p>
 
   <div class="model-container">
     <model-viewer id="hoodieModel"
@@ -96,7 +86,7 @@
                   exposure="1"
                   shadow-intensity="1"
                   interaction-prompt="none">
-      <div slot="hotspot-1" class="text-hotspot" data-position="0 1 0.1" data-normal="0 0 1">
+      <div slot="hotspot-text" class="text-hotspot" data-position="0 1 0.1" data-normal="0 0 1">
         <span id="hoodieText">متن نمونه</span>
       </div>
     </model-viewer>
@@ -113,17 +103,14 @@
 
     <label class="label">متن دلخواه روی هودی:</label>
     <input type="text" id="textInput" placeholder="مثلاً: توسکا" />
-    <br>
-    <button id="lockButton">تثبیت متن</button>
   </div>
 
   <script>
     const modelViewer = document.getElementById("hoodieModel");
-    const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const hoodieText = document.getElementById("hoodieText");
-    const lockButton = document.getElementById("lockButton");
     const hotspot = hoodieText.parentElement;
+    const colorCircles = document.querySelectorAll(".color-circle");
 
     const colorMap = {
       red: "#ff0000",
@@ -164,31 +151,16 @@
       hoodieText.textContent = textInput.value || "متن نمونه";
     });
 
-    // درگ کردن متن
-    let isDragging = false;
-
-    hoodieText.addEventListener("mousedown", () => {
-      isDragging = true;
-    });
-
-    window.addEventListener("mouseup", () => {
-      isDragging = false;
-    });
-
-    modelViewer.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        const rect = modelViewer.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-        const y = ((e.clientY - rect.top) / rect.height - 0.5) * -2;
-        hotspot.dataset.position = `${x.toFixed(2)} ${(y + 1).toFixed(2)} 0.1`;
+    // کلیک روی مدل برای جابجایی متن
+    modelViewer.addEventListener("click", async (event) => {
+      const rect = modelViewer.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const hit = await modelViewer.positionAndNormalFromPoint(x, y);
+      if (hit) {
+        hotspot.dataset.position = `${hit.position.x} ${hit.position.y} ${hit.position.z}`;
+        hotspot.dataset.normal = `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`;
       }
-    });
-
-    // دکمه تثبیت
-    lockButton.addEventListener("click", () => {
-      hoodieText.style.pointerEvents = "none";
-      hoodieText.style.background = "rgba(255, 255, 255, 0.6)";
-      isDragging = false;
     });
   </script>
 </body>
