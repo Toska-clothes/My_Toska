@@ -91,6 +91,18 @@
       border-radius: 8px;
       font-size: 1rem;
     }
+    .save-text-button {
+      padding: 5px 10px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .save-text-button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
@@ -138,6 +150,8 @@
       <option value="blue">آبی</option>
     </select>
 
+    <button class="save-text-button" id="saveTextButton">تثبیت متن</button>
+
     <label class="label" for="image">آپلود تصویر:</label>
     <input type="file" id="image" accept="image/*"/>
   </div>
@@ -150,7 +164,9 @@
     const imageInput = document.getElementById('image');
     const uploadedImage = document.getElementById('uploadedImage');
     const textColorSelect = document.getElementById('textColor');
+    const saveTextButton = document.getElementById('saveTextButton');
     let textPosition = { top: '40%', left: '50%' }; // Default position
+    let isTextFixed = false;
 
     // تغییر رنگ هودی
     colorCircles.forEach(circle => {
@@ -183,32 +199,40 @@
       textOverlay.style.color = color;
     });
 
-    // قابلیت جابجایی متن
+    // تثبیت متن
+    saveTextButton.addEventListener('click', () => {
+      isTextFixed = true;
+      textOverlay.style.pointerEvents = 'none'; // جلوگیری از تغییر موقعیت بعد از تثبیت
+    });
+
+    // قابلیت جابجایی متن قبل از تثبیت
     let isDragging = false;
     textOverlay.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      const offsetX = e.clientX - textOverlay.offsetLeft;
-      const offsetY = e.clientY - textOverlay.offsetTop;
+      if (!isTextFixed) {
+        isDragging = true;
+        const offsetX = e.clientX - textOverlay.offsetLeft;
+        const offsetY = e.clientY - textOverlay.offsetTop;
 
-      const onMouseMove = (moveEvent) => {
-        if (isDragging) {
-          textOverlay.style.left = `${moveEvent.clientX - offsetX}px`;
-          textOverlay.style.top = `${moveEvent.clientY - offsetY}px`;
-          textPosition = {
-            top: `${moveEvent.clientY - offsetY}px`,
-            left: `${moveEvent.clientX - offsetX}px`
-          };
-        }
-      };
+        const onMouseMove = (moveEvent) => {
+          if (isDragging) {
+            textOverlay.style.left = `${moveEvent.clientX - offsetX}px`;
+            textOverlay.style.top = `${moveEvent.clientY - offsetY}px`;
+            textPosition = {
+              top: `${moveEvent.clientY - offsetY}px`,
+              left: `${moveEvent.clientX - offsetX}px`
+            };
+          }
+        };
 
-      const onMouseUp = () => {
-        isDragging = false;
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-      };
+        const onMouseUp = () => {
+          isDragging = false;
+          window.removeEventListener('mousemove', onMouseMove);
+          window.removeEventListener('mouseup', onMouseUp);
+        };
 
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+      }
     });
 
     // آپلود تصویر و تغییر سایز
