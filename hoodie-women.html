@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <title>هودی قابل شخصی‌سازی</title>
   <style>
-    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+      direction: rtl;
+    }
     #textInput {
       position: absolute;
       top: 20px;
@@ -12,6 +17,9 @@
       padding: 10px;
       font-size: 1rem;
       z-index: 10;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      outline: none;
     }
   </style>
 </head>
@@ -46,7 +54,7 @@
       scene.add(light);
 
       const loader = new GLTFLoader();
-      loader.load('/mnt/data/hoodie.glb', gltf => {
+      loader.load('hoodie.glb', gltf => {
         model = gltf.scene;
         scene.add(model);
         animate();
@@ -80,13 +88,15 @@
 
     function addText(text, position) {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.font = '48px sans-serif';
       canvas.width = 512;
       canvas.height = 128;
+
+      const ctx = canvas.getContext('2d');
+      ctx.font = 'bold 48px sans-serif';
       ctx.fillStyle = '#000';
       ctx.textAlign = 'center';
-      ctx.fillText(text, canvas.width / 2, 80);
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
       const texture = new THREE.CanvasTexture(canvas);
       const material = new THREE.SpriteMaterial({ map: texture, depthTest: false });
