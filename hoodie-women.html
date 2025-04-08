@@ -86,6 +86,11 @@
       max-height: 100%;
       transition: all 0.2s ease;
     }
+    .color-picker select {
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -125,6 +130,14 @@
     <label class="label" for="text">متن دلخواه:</label>
     <input type="text" id="text" placeholder="مثلاً: قدرت در حرکت"/>
 
+    <label class="label" for="textColor">رنگ متن:</label>
+    <select id="textColor">
+      <option value="white">سفید</option>
+      <option value="black">مشکی</option>
+      <option value="red">قرمز</option>
+      <option value="blue">آبی</option>
+    </select>
+
     <label class="label" for="image">آپلود تصویر:</label>
     <input type="file" id="image" accept="image/*"/>
   </div>
@@ -133,9 +146,11 @@
     const colorCircles = document.querySelectorAll('.color-circle');
     const modelViewer = document.getElementById('hoodieModel');
     const textInput = document.getElementById('text');
+    const textOverlay = document.getElementById('text-overlay');
     const imageInput = document.getElementById('image');
     const uploadedImage = document.getElementById('uploadedImage');
-    const textOverlay = document.getElementById('text-overlay');
+    const textColorSelect = document.getElementById('textColor');
+    let textPosition = { top: '40%', left: '50%' }; // Default position
 
     // تغییر رنگ هودی
     colorCircles.forEach(circle => {
@@ -157,10 +172,43 @@
       });
     });
 
-    // نمایش متن روی هودی
+    // نمایش متن روی هودی و تغییر رنگ متن
     textInput.addEventListener('input', (event) => {
       const text = event.target.value;
       textOverlay.innerText = text;
+    });
+
+    textColorSelect.addEventListener('change', (event) => {
+      const color = event.target.value;
+      textOverlay.style.color = color;
+    });
+
+    // قابلیت جابجایی متن
+    let isDragging = false;
+    textOverlay.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      const offsetX = e.clientX - textOverlay.offsetLeft;
+      const offsetY = e.clientY - textOverlay.offsetTop;
+
+      const onMouseMove = (moveEvent) => {
+        if (isDragging) {
+          textOverlay.style.left = `${moveEvent.clientX - offsetX}px`;
+          textOverlay.style.top = `${moveEvent.clientY - offsetY}px`;
+          textPosition = {
+            top: `${moveEvent.clientY - offsetY}px`,
+            left: `${moveEvent.clientX - offsetX}px`
+          };
+        }
+      };
+
+      const onMouseUp = () => {
+        isDragging = false;
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
     });
 
     // آپلود تصویر و تغییر سایز
@@ -189,12 +237,6 @@
 
         uploadedImage.style.width = `${initialWidth + deltaX}px`;
         uploadedImage.style.height = `${initialHeight + deltaY}px`;
-
-        // نمایش سایز تصویر به سانتی‌متر
-        const widthInCm = (initialWidth + deltaX) / 37.795;
-        const heightInCm = (initialHeight + deltaY) / 37.795;
-        console.log(`عرض تصویر: ${widthInCm.toFixed(2)} سانتیمتر`);
-        console.log(`ارتفاع تصویر: ${heightInCm.toFixed(2)} سانتیمتر`);
       };
 
       const onMouseUp = () => {
