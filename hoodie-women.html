@@ -151,7 +151,8 @@
     });
 
     // اضافه کردن رویداد لمس برای جابجایی متن
-    modelViewer.addEventListener('click', (event) => {
+    modelViewer.addEventListener('pointerdown', (event) => {
+      // دریافت موقعیت کلیک
       const boundingBox = modelViewer.getBoundingClientRect();
       const modelX = (event.clientX - boundingBox.left) / boundingBox.width * 2 - 1; // تبدیل به مختصات X در محدوده -1 تا 1
       const modelY = (event.clientY - boundingBox.top) / boundingBox.height * 2 - 1; // تبدیل به مختصات Y در محدوده -1 تا 1
