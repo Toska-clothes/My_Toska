@@ -1,155 +1,133 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>هودی زنانه | توسکا</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            text-align: center;
-            background-color: #f3f1e0; /* رنگ پس‌زمینه نسکافه‌ای */
-            color: #3e2723; /* رنگ متنی قهوه‌ای تیره */
-        }
-        h1 {
-            font-size: 2.5rem;
-            margin-top: 20px;
-            color: #3e2723;
-        }
-        .model-container {
-            margin-top: 30px;
-            width: 100%;
-            height: 500px; /* برای اندازه دادن به مدل */
-        }
-        .options-container {
-            margin-top: 50px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .btn {
-            padding: 15px 40px;
-            background-color: #f5a623; /* رنگ دکمه قهوه‌ای مایل به زرد */
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #ff8c00; /* تغییر رنگ دکمه هنگام هاور */
-        }
-        label {
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-        select, input {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>هودی زنانه | توسکا</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      text-align: center;
+      background-color: #f3f1e0;
+      color: #3e2723;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .model-container {
+      width: 100%;
+      height: 500px;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+    .options {
+      margin: 30px auto;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      align-items: center;
+    }
+    select, input[type="text"], input[type="file"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      font-size: 1rem;
+    }
+    .colors {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .color-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .color-circle.selected {
+      border-color: #333;
+    }
+  </style>
 </head>
 <body>
-    <h1>هودی زنانه</h1>
-    <p>در اینجا می‌توانید هودی خود را طراحی کنید:</p>
+  <h1>هودی زنانه</h1>
+  <div class="model-container">
+    <model-viewer 
+      id="modelViewer"
+      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie_with_hood_up.glb"
+      alt="هودی زنانه"
+      auto-rotate
+      camera-controls
+      exposure="1"
+      shadow-intensity="1"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      disable-zoom
+      touch-action="pan-y"
+    ></model-viewer>
+  </div>
 
-    <!-- نمایش مدل سه‌بعدی هودی -->
-    <div class="model-container">
-        <model-viewer src="https://toska-clothes.github.io/My_Toska/raw/refs/heads/main/hoodie_with_hood_up.glb" alt="3D Hoodie" auto-rotate camera-controls></model-viewer>
+  <div class="options">
+    <select id="size">
+      <option>سایز خود را انتخاب کنید</option>
+      <option value="S">کوچک (S)</option>
+      <option value="M">متوسط (M)</option>
+      <option value="L">بزرگ (L)</option>
+      <option value="XL">خیلی بزرگ (XL)</option>
+    </select>
+
+    <select id="fabric">
+      <option value="cotton">پنبه</option>
+      <option value="polyester">پلی‌استر</option>
+      <option value="wool">پشمی</option>
+    </select>
+
+    <div class="colors">
+      <div class="color-circle" style="background-color: red;" data-color="#ff0000"></div>
+      <div class="color-circle" style="background-color: blue;" data-color="#0000ff"></div>
+      <div class="color-circle" style="background-color: black;" data-color="#000000"></div>
+      <div class="color-circle" style="background-color: white; border: 1px solid #ccc;" data-color="#ffffff"></div>
     </div>
 
-    <div class="options-container">
-        <!-- سایز -->
-        <div>
-            <label for="size">سایز:</label>
-            <select id="size" class="btn">
-                <option value="small">S</option>
-                <option value="medium">M</option>
-                <option value="large">L</option>
-                <option value="extra-large">XL</option>
-            </select>
-        </div>
+    <input type="text" id="text" placeholder="متن دلخواه برای چاپ">
+    <input type="file" id="image" accept="image/*">
+  </div>
 
-        <!-- جنس پارچه -->
-        <div>
-            <label for="fabric">جنس پارچه:</label>
-            <select id="fabric" class="btn">
-                <option value="cotton">پنبه</option>
-                <option value="polyester">پلی استر</option>
-                <option value="linen">کتان</option>
-            </select>
-        </div>
+  <script>
+    const modelViewer = document.getElementById("modelViewer");
+    const colorCircles = document.querySelectorAll(".color-circle");
 
-        <!-- رنگ -->
-        <div>
-            <label for="color">رنگ:</label>
-            <select id="color" class="btn">
-                <option value="red">قرمز</option>
-                <option value="blue">آبی</option>
-                <option value="black">مشکی</option>
-                <option value="white">سفید</option>
-            </select>
-        </div>
+    colorCircles.forEach(circle => {
+      circle.addEventListener("click", async () => {
+        colorCircles.forEach(c => c.classList.remove("selected"));
+        circle.classList.add("selected");
 
-        <!-- متن -->
-        <div>
-            <label for="text">متن:</label>
-            <input type="text" id="text" class="btn" placeholder="متن دلخواه خود را وارد کنید">
-        </div>
+        const color = circle.dataset.color;
 
-        <!-- تصویر -->
-        <div>
-            <label for="image">تصویر:</label>
-            <input type="file" id="image" class="btn" accept="image/*">
-        </div>
-    </div>
+        await modelViewer.updateComplete;
 
-    <script type="module">
-        import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/loaders/GLTFLoader.js';
-
-        const modelViewer = document.querySelector('model-viewer');
-        const sizeSelect = document.getElementById('size');
-        const fabricSelect = document.getElementById('fabric');
-        const colorSelect = document.getElementById('color');
-        const textInput = document.getElementById('text');
-        const imageInput = document.getElementById('image');
-
-        // Add Event Listeners to options
-        sizeSelect.addEventListener('change', updateDesign);
-        fabricSelect.addEventListener('change', updateDesign);
-        colorSelect.addEventListener('change', updateDesign);
-        textInput.addEventListener('input', updateDesign);
-        imageInput.addEventListener('change', updateImage);
-
-        function updateDesign() {
-            const size = sizeSelect.value;
-            const fabric = fabricSelect.value;
-            const color = colorSelect.value;
-            const text = textInput.value;
-
-            console.log(`Selected size: ${size}, fabric: ${fabric}, color: ${color}, text: ${text}`);
-            // اینجا می‌توانید کدهایی برای اعمال تغییرات به مدل اضافه کنید.
-            // مثلا تغییر رنگ مدل بر اساس انتخاب کاربر
+        const material = modelViewer.model?.materials[0];
+        if (material) {
+          material.pbrMetallicRoughness.setBaseColorFactor([ 
+            ...hexToRgbNormalized(color), 1 
+          ]);
         }
+      });
+    });
 
-        function updateImage() {
-            const file = imageInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const image = new Image();
-                    image.src = event.target.result;
-                    modelViewer.appendChild(image); // اضافه کردن تصویر به مدل
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-    </script>
+    function hexToRgbNormalized(hex) {
+      const bigint = parseInt(hex.slice(1), 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return [r / 255, g / 255, b / 255];
+    }
+  </script>
 </body>
 </html>
