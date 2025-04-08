@@ -137,9 +137,11 @@
       const hex = colorMap[colorName];
       const rgba = hexToRgba(hex);
       await modelViewer.updateComplete;
-      const material = modelViewer.model?.materials[0];
-      if (material) {
-        material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+      const materials = modelViewer.model?.materials;
+      if (materials) {
+        materials.forEach(material => {
+          material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+        });
       }
     }
 
