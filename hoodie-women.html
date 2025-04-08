@@ -37,7 +37,7 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    select, input[type="text"], input[type="file"] {
+    input[type="text"], input[type="range"] {
       padding: 10px;
       margin-bottom: 20px;
       border-radius: 8px;
@@ -85,7 +85,7 @@
                   shadow-intensity="1"
                   interaction-prompt="none">
       <!-- متن روی هودی -->
-      <div slot="hotspot-1" class="text-hotspot" data-position="0 1 0.5" data-normal="0 0 1">
+      <div slot="hotspot-1" class="text-hotspot" id="textHotspot" data-position="0 1 0.5" data-normal="0 0 1">
         <span id="hoodieText">متن نمونه</span>
       </div>
     </model-viewer>
@@ -100,13 +100,30 @@
     </div>
     <label class="label">متن دلخواه روی هودی:</label>
     <input type="text" id="textInput" placeholder="مثلاً: توسکا" />
+
+    <!-- تنظیم موقعیت متن -->
+    <label class="label">جابجایی متن:</label>
+    <div>
+      <label for="xPos">X:</label>
+      <input type="range" id="xPos" min="-1" max="1" step="0.01" value="0" />
+    </div>
+    <div>
+      <label for="yPos">Y:</label>
+      <input type="range" id="yPos" min="-1" max="2" step="0.01" value="1" />
+    </div>
+    <div>
+      <label for="zPos">Z:</label>
+      <input type="range" id="zPos" min="-1" max="1" step="0.01" value="0.5" />
+    </div>
   </div>
+
   <script>
     const modelViewer = document.getElementById("hoodieModel");
     const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const hoodieText = document.getElementById("hoodieText");
-
+    const textHotspot = document.getElementById("textHotspot");
+    
     const colorMap = {
       red: "#ff0000",
       blue: "#0000ff",
@@ -147,6 +164,24 @@
     textInput.addEventListener("input", () => {
       hoodieText.textContent = textInput.value || "متن نمونه";
     });
+
+    // تغییر موقعیت متن با استفاده از اسلایدرها
+    const xPosSlider = document.getElementById("xPos");
+    const yPosSlider = document.getElementById("yPos");
+    const zPosSlider = document.getElementById("zPos");
+
+    function updatePosition() {
+      const x = parseFloat(xPosSlider.value);
+      const y = parseFloat(yPosSlider.value);
+      const z = parseFloat(zPosSlider.value);
+
+      // بروزرسانی موقعیت متن روی مدل
+      textHotspot.setAttribute("data-position", `${x} ${y} ${z}`);
+    }
+
+    xPosSlider.addEventListener("input", updatePosition);
+    yPosSlider.addEventListener("input", updatePosition);
+    zPosSlider.addEventListener("input", updatePosition);
   </script>
 </body>
 </html>
