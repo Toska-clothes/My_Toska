@@ -127,16 +127,31 @@
         const selectedColor = circle.getAttribute('data-color');
         console.log("رنگ انتخاب‌شده:", selectedColor);
         
-        // تغییر رنگ مدل سه‌بعدی (در صورت امکان با استفاده از ماتریس رنگ)
-        modelViewer.style.setProperty('--accent-color', selectedColor);
+        // تغییر رنگ مدل سه‌بعدی
+        if (selectedColor === "red") {
+          modelViewer.setAttribute('style', 'filter: hue-rotate(0deg);');
+        } else if (selectedColor === "blue") {
+          modelViewer.setAttribute('style', 'filter: hue-rotate(200deg);');
+        } else if (selectedColor === "black") {
+          modelViewer.setAttribute('style', 'filter: hue-rotate(120deg);');
+        } else if (selectedColor === "white") {
+          modelViewer.setAttribute('style', 'filter: hue-rotate(300deg);');
+        }
       });
     });
 
     // نمایش متن روی هودی
     textInput.addEventListener('input', (event) => {
       const text = event.target.value;
-      // نمایش متن روی مدل سه‌بعدی (یک راه حل ساده برای نمایش متن)
-      modelViewer.querySelector('p').textContent = text;
+      // ایجاد یک <canvas> برای نمایش متن
+      let canvas = modelViewer.querySelector("canvas");
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        modelViewer.appendChild(canvas);
+      }
+      const ctx = canvas.getContext('2d');
+      ctx.font = "30px Arial";
+      ctx.fillText(text, 50, 50);  // موقعیت متن
     });
 
     // آپلود تصویر و تغییر سایز
@@ -165,22 +180,9 @@
 
         uploadedImage.style.width = `${initialWidth + deltaX}px`;
         uploadedImage.style.height = `${initialHeight + deltaY}px`;
-        
+
         // نمایش سایز تصویر به سانتی‌متر
         const widthInCm = (initialWidth + deltaX) / 37.795;
         const heightInCm = (initialHeight + deltaY) / 37.795;
         console.log(`عرض تصویر: ${widthInCm.toFixed(2)} سانتیمتر`);
-        console.log(`ارتفاع تصویر: ${heightInCm.toFixed(2)} سانتیمتر`);
-      };
-
-      const onMouseUp = () => {
-        window.removeEventListener('mousemove', onMouseMove);
-        window.removeEventListener('mouseup', onMouseUp);
-      };
-
-      window.addEventListener('mousemove', onMouseMove);
-      window.addEventListener('mouseup', onMouseUp);
-    });
-  </script>
-</body>
-</html>
+        console.log(`ارتفاع تصویر: ${heightInCm
