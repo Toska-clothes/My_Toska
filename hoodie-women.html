@@ -2,6 +2,7 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>هودی زنانه | توسکا</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
@@ -12,121 +13,88 @@
       background-color: #f3f1e0;
       color: #3e2723;
     }
+
     h1 {
+      font-size: 2.5rem;
       margin-top: 20px;
     }
-    .model-container {
-      width: 100%;
-      height: 500px;
-    }
+
     model-viewer {
       width: 100%;
-      height: 100%;
+      height: 500px;
+      background-color: #fff;
     }
-    .options {
-      margin: 30px auto;
-      max-width: 600px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
+
+    .options-container {
+      margin-top: 40px;
     }
-    select, input[type="text"], input[type="file"] {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 80%;
+
+    .dropdown, .text-input, .file-input {
+      margin: 10px;
+      padding: 10px 20px;
+      border-radius: 10px;
       font-size: 1rem;
+      border: 1px solid #ccc;
     }
-    .colors {
+
+    .color-options {
       display: flex;
-      gap: 10px;
       justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
     }
+
     .color-circle {
       width: 30px;
       height: 30px;
       border-radius: 50%;
+      border: 2px solid #fff;
       cursor: pointer;
-      border: 2px solid transparent;
+      box-shadow: 0 0 3px rgba(0,0,0,0.3);
     }
-    .color-circle.selected {
-      border-color: #333;
+
+    .color-circle:hover {
+      transform: scale(1.1);
     }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <div class="model-container">
-    <model-viewer 
-      id="modelViewer"
-      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie_with_hood_up.glb"
-      alt="هودی زنانه"
-      auto-rotate
-      camera-controls
-      exposure="1"
-      shadow-intensity="1"
-      ar
-      ar-modes="webxr scene-viewer quick-look"
-      disable-zoom
-      touch-action="pan-y"
-    ></model-viewer>
-  </div>
+  <p>مدل دلخواه خود را بسازید:</p>
 
-  <div class="options">
-    <select id="size">
-      <option>سایز خود را انتخاب کنید</option>
-      <option value="S">کوچک (S)</option>
-      <option value="M">متوسط (M)</option>
-      <option value="L">بزرگ (L)</option>
-      <option value="XL">خیلی بزرگ (XL)</option>
+  <model-viewer id="hoodieModel" src="hoodie_with_hood_up.glb" alt="هودی زنانه سه‌بعدی" auto-rotate camera-controls></model-viewer>
+
+  <div class="options-container">
+    <select class="dropdown" id="size">
+      <option value="S">سایز S</option>
+      <option value="M">سایز M</option>
+      <option value="L">سایز L</option>
+      <option value="XL">سایز XL</option>
     </select>
 
-    <select id="fabric">
+    <select class="dropdown" id="fabric">
       <option value="cotton">پنبه</option>
       <option value="polyester">پلی‌استر</option>
-      <option value="wool">پشمی</option>
+      <option value="wool">پشم</option>
     </select>
 
-    <div class="colors">
-      <div class="color-circle" style="background-color: red;" data-color="#ff0000"></div>
-      <div class="color-circle" style="background-color: blue;" data-color="#0000ff"></div>
-      <div class="color-circle" style="background-color: black;" data-color="#000000"></div>
-      <div class="color-circle" style="background-color: white; border: 1px solid #ccc;" data-color="#ffffff"></div>
+    <div class="color-options">
+      <div class="color-circle" style="background-color: red;" onclick="changeColor('red')"></div>
+      <div class="color-circle" style="background-color: blue;" onclick="changeColor('blue')"></div>
+      <div class="color-circle" style="background-color: black;" onclick="changeColor('black')"></div>
+      <div class="color-circle" style="background-color: white; border: 2px solid #aaa;" onclick="changeColor('white')"></div>
     </div>
 
-    <input type="text" id="text" placeholder="متن دلخواه برای چاپ">
-    <input type="file" id="image" accept="image/*">
+    <input type="text" id="text" class="text-input" placeholder="متن دلخواه...">
+    <input type="file" id="image" class="file-input" accept="image/*">
   </div>
 
   <script>
-    const modelViewer = document.getElementById("modelViewer");
-    const colorCircles = document.querySelectorAll(".color-circle");
-
-    colorCircles.forEach(circle => {
-      circle.addEventListener("click", async () => {
-        colorCircles.forEach(c => c.classList.remove("selected"));
-        circle.classList.add("selected");
-
-        const color = circle.dataset.color;
-
-        await modelViewer.updateComplete;
-
-        const material = modelViewer.model?.materials[0];
-        if (material) {
-          material.pbrMetallicRoughness.setBaseColorFactor([ 
-            ...hexToRgbNormalized(color), 1 
-          ]);
-        }
-      });
-    });
-
-    function hexToRgbNormalized(hex) {
-      const bigint = parseInt(hex.slice(1), 16);
-      const r = (bigint >> 16) & 255;
-      const g = (bigint >> 8) & 255;
-      const b = bigint & 255;
-      return [r / 255, g / 255, b / 255];
+    function changeColor(color) {
+      const model = document.getElementById('hoodieModel');
+      // این بخش فقط آماده‌سازی برای زمانی هست که مدل از تغییر رنگ پشتیبانی کنه
+      console.log("Color selected:", color);
+      // می‌تونید بعداً متریال‌های مدل رو از طریق three.js یا افزونه اختصاصی تغییر بدید
     }
   </script>
 </body>
