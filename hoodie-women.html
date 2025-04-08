@@ -21,6 +21,7 @@
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
+      position: relative;
     }
     model-viewer {
       width: 100%;
@@ -59,6 +60,16 @@
     .color-circle.selected {
       border: 3px solid #000;
     }
+    #text-overlay {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+      pointer-events: none;
+    }
     .image-container {
       position: absolute;
       top: 20%;
@@ -88,6 +99,10 @@
                   camera-controls 
                   ar>
     </model-viewer>
+    <div id="text-overlay"></div>
+    <div class="image-container">
+      <img id="uploadedImage" style="display:none;" />
+    </div>
   </div>
 
   <div class="options-container">
@@ -112,10 +127,6 @@
 
     <label class="label" for="image">آپلود تصویر:</label>
     <input type="file" id="image" accept="image/*"/>
-
-    <div class="image-container">
-      <img id="uploadedImage" style="display:none;" />
-    </div>
   </div>
 
   <script>
@@ -124,6 +135,7 @@
     const textInput = document.getElementById('text');
     const imageInput = document.getElementById('image');
     const uploadedImage = document.getElementById('uploadedImage');
+    const textOverlay = document.getElementById('text-overlay');
 
     // تغییر رنگ هودی
     colorCircles.forEach(circle => {
@@ -131,9 +143,8 @@
         colorCircles.forEach(c => c.classList.remove('selected'));
         circle.classList.add('selected');
         const selectedColor = circle.getAttribute('data-color');
-        console.log("رنگ انتخاب‌شده:", selectedColor);
         
-        // تغییر رنگ مدل سه‌بعدی
+        // تغییر رنگ مدل سه‌بعدی با استفاده از رنگ‌ها
         if (selectedColor === "red") {
           modelViewer.setAttribute('style', 'filter: hue-rotate(0deg);');
         } else if (selectedColor === "blue") {
@@ -149,20 +160,7 @@
     // نمایش متن روی هودی
     textInput.addEventListener('input', (event) => {
       const text = event.target.value;
-      // ایجاد یک عنصر برای نمایش متن روی هودی
-      let textElement = document.querySelector("#text-overlay");
-      if (!textElement) {
-        textElement = document.createElement("div");
-        textElement.id = "text-overlay";
-        textElement.style.position = "absolute";
-        textElement.style.top = "50%";
-        textElement.style.left = "50%";
-        textElement.style.transform = "translate(-50%, -50%)";
-        textElement.style.fontSize = "24px";
-        textElement.style.color = "white";
-        modelViewer.appendChild(textElement);
-      }
-      textElement.innerText = text;
+      textOverlay.innerText = text;
     });
 
     // آپلود تصویر و تغییر سایز
