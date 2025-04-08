@@ -59,19 +59,31 @@
     .color-circle.selected {
       border: 3px solid #000;
     }
+    .image-container {
+      position: relative;
+      display: inline-block;
+    }
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transition: all 0.2s ease;
+    }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
   <p>مدل را مشاهده و ویژگی‌ها را انتخاب کنید:</p>
   <div class="model-container">
-    <model-viewer src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/hoodie.glb"
+    <model-viewer id="hoodieModel"
+                  src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/hoodie.glb"
                   alt="3D Hoodie" 
                   auto-rotate 
                   camera-controls 
                   ar>
     </model-viewer>
   </div>
+
   <div class="options-container">
     <label class="label" for="size">سایز:</label>
     <select id="size">
@@ -94,18 +106,80 @@
 
     <label class="label" for="image">آپلود تصویر:</label>
     <input type="file" id="image" accept="image/*"/>
+
+    <div class="image-container">
+      <img id="uploadedImage" style="display:none;" />
+    </div>
   </div>
 
   <script>
     const colorCircles = document.querySelectorAll('.color-circle');
+    const modelViewer = document.getElementById('hoodieModel');
+    const textInput = document.getElementById('text');
+    const imageInput = document.getElementById('image');
+    const uploadedImage = document.getElementById('uploadedImage');
+
+    // تغییر رنگ هودی
     colorCircles.forEach(circle => {
       circle.addEventListener('click', () => {
         colorCircles.forEach(c => c.classList.remove('selected'));
         circle.classList.add('selected');
         const selectedColor = circle.getAttribute('data-color');
         console.log("رنگ انتخاب‌شده:", selectedColor);
-        // اینجا می‌تونی کد تغییر رنگ روی مدل سه‌بعدی بنویسی
+        
+        // تغییر رنگ مدل سه‌بعدی (در صورت امکان با استفاده از ماتریس رنگ)
+        modelViewer.style.setProperty('--accent-color', selectedColor);
       });
+    });
+
+    // نمایش متن روی هودی
+    textInput.addEventListener('input', (event) => {
+      const text = event.target.value;
+      // نمایش متن روی مدل سه‌بعدی (یک راه حل ساده برای نمایش متن)
+      modelViewer.querySelector('p').textContent = text;
+    });
+
+    // آپلود تصویر و تغییر سایز
+    imageInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          uploadedImage.src = e.target.result;
+          uploadedImage.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // تغییر سایز تصویر با کشیدن
+    uploadedImage.addEventListener('mousedown', (e) => {
+      const initialWidth = uploadedImage.width;
+      const initialHeight = uploadedImage.height;
+      const initialMouseX = e.clientX;
+      const initialMouseY = e.clientY;
+
+      const onMouseMove = (moveEvent) => {
+        const deltaX = moveEvent.clientX - initialMouseX;
+        const deltaY = moveEvent.clientY - initialMouseY;
+
+        uploadedImage.style.width = `${initialWidth + deltaX}px`;
+        uploadedImage.style.height = `${initialHeight + deltaY}px`;
+        
+        // نمایش سایز تصویر به سانتی‌متر
+        const widthInCm = (initialWidth + deltaX) / 37.795;
+        const heightInCm = (initialHeight + deltaY) / 37.795;
+        console.log(`عرض تصویر: ${widthInCm.toFixed(2)} سانتیمتر`);
+        console.log(`ارتفاع تصویر: ${heightInCm.toFixed(2)} سانتیمتر`);
+      };
+
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
     });
   </script>
 </body>
