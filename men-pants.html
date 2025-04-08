@@ -76,8 +76,8 @@
 
   <div class="model-container">
     <model-viewer id="pantsModel"
-                  src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/men_pants.glb"
-                  alt="3D Men Pants"
+                  src="https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/pants_1.glb"
+                  alt="3D Pants"
                   auto-rotate
                   camera-controls
                   ar
@@ -105,7 +105,7 @@
     </div>
 
     <label class="label" for="text">متن دلخواه:</label>
-    <input type="text" id="textInput" placeholder="مثلاً: شلوار مردانه باکیفیت"/>
+    <input type="text" id="textInput" placeholder="مثلاً: شلوار باکیفیت"/>
     <button id="applyText">اعمال متن</button>
 
     <label class="label" for="image">آپلود تصویر:</label>
@@ -117,7 +117,6 @@
     const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
-    const imageInput = document.getElementById("image");
 
     const colorMap = {
       red: "#ff0000",
@@ -157,19 +156,6 @@
 
     applyTextBtn.addEventListener("click", () => {
       alert("برای درج واقعی متن روی شلوار باید از تکنیک‌های پیشرفته‌تر مانند تکسچر پویا یا Three.js استفاده شود.");
-    });
-
-    // بارگذاری تصویر از گالری و اعمال آن به مدل
-    imageInput.addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const imageURL = e.target.result;
-          modelViewer.querySelector('model-viewer').setAttribute('src', imageURL);
-        };
-        reader.readAsDataURL(file);
-      }
     });
   </script>
 </body>
