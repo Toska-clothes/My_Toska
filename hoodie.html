@@ -137,7 +137,32 @@
     });
 
     applyTextBtn.addEventListener("click", () => {
-      alert("برای درج واقعی متن روی لباس باید از تکنیک‌های حرفه‌ای‌تر مثل استفاده از تکسچر دینامیک یا Three.js استفاده شود.");
+      const text = textInput.value;
+      if (text.trim() === "") {
+        alert("لطفاً یک متن وارد کنید.");
+        return;
+      }
+      
+      // ایجاد بوم برای نوشتن متن
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = 512;
+      canvas.height = 512;
+      
+      // پس‌زمینه و تنظیمات متن
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "40px Vazirmatn";
+      ctx.fillStyle = "black";
+      ctx.fillText(text, 50, 100);
+      
+      // تبدیل بوم به تصویر
+      const textureImage = new Image();
+      textureImage.src = canvas.toDataURL();
+      textureImage.onload = function() {
+        // اعمال تکسچر به مدل
+        modelViewer.model.materials[0].pbrMetallicRoughness.setBaseColorTexture(textureImage);
+      };
     });
   </script>
 </body>
