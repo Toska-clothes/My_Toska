@@ -73,7 +73,7 @@
   <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
   <div class="model-container">
     <model-viewer id="hoodieModel"
-                  src="hoodie.glb"
+                  src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
                   alt="هودی سه‌بعدی"
                   auto-rotate
                   camera-controls
@@ -142,26 +142,28 @@
         alert("لطفاً یک متن وارد کنید.");
         return;
       }
-      
+
       // ایجاد بوم برای نوشتن متن
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
       canvas.width = 512;
       canvas.height = 512;
-      
+
       // پس‌زمینه و تنظیمات متن
       ctx.fillStyle = "white";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.font = "40px Vazirmatn";
       ctx.fillStyle = "black";
       ctx.fillText(text, 50, 100);
-      
+
       // تبدیل بوم به تصویر
       const textureImage = new Image();
       textureImage.src = canvas.toDataURL();
       textureImage.onload = function() {
         // اعمال تکسچر به مدل
-        modelViewer.model.materials[0].pbrMetallicRoughness.setBaseColorTexture(textureImage);
+        const texture = new THREE.Texture(textureImage);
+        texture.needsUpdate = true;
+        modelViewer.model.materials[0].pbrMetallicRoughness.setBaseColorTexture(texture);
       };
     });
   </script>
