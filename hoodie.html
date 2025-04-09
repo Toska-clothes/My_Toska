@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مدل سه‌بعدی با متن</title>
-  <script type="module">
-    import { modelViewer } from 'https://cdn.jsdelivr.net/npm/@google/model-viewer@latest/dist/model-viewer.js';
-  </script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@latest/dist/model-viewer.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -40,7 +38,14 @@
 
   <!-- مدل سه‌بعدی -->
   <div id="modelViewerContainer">
-    <model-viewer id="modelViewer" src="your-model.glb" alt="3D model" auto-rotate camera-controls background-color="#FFFFFF"></model-viewer>
+    <model-viewer 
+      id="modelViewer" 
+      src="your-model.glb" 
+      alt="3D model" 
+      auto-rotate 
+      camera-controls 
+      background-color="#FFFFFF">
+    </model-viewer>
   </div>
 
   <script>
