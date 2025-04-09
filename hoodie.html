@@ -50,7 +50,8 @@
       transition: transform 0.3s ease-in-out;
     }
     .color-wheel.clicked {
-      transform: scale(1.2); /* بزرگ شدن دکمه هنگام کلیک */
+      transform: scale(3); /* بزرگ شدن دکمه هنگام کلیک */
+      transition: transform 0.3s ease-in-out;
     }
     button {
       padding: 10px 20px;
@@ -81,7 +82,7 @@
   <div class="options-container">
     <label class="label">رنگ:</label>
     <div class="color-picker">
-      <canvas id="colorWheel" width="100" height="100" style="border-radius: 50%; cursor: pointer;"></canvas>
+      <canvas id="colorWheel" width="200" height="200" style="border-radius: 50%; cursor: pointer;"></canvas>
     </div>
   </div>
 
