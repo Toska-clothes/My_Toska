@@ -44,14 +44,16 @@
       alt="3D model" 
       auto-rotate 
       camera-controls 
-      background-color="#FFFFFF">
+      background-color="#FFFFFF" 
+      style="width: 100%; height: 100%;"
+      scale="1 1 1">
     </model-viewer>
   </div>
 
   <script>
     const modelViewer = document.querySelector('#modelViewer');
 
-    // اعمال متن به مدل
+    // تابعی برای اعمال متن به مدل
     async function applyTextToModel() {
       const text = document.getElementById("customText").value;
       if (!text) {
