@@ -1,129 +1,112 @@
-<!DOCTYPE html>
-<html lang="fa">
-<head>
-  <meta charset="UTF-8" />
-  <title>هودی سه‌بعدی با متن</title>
-  <style>
-    body {
-      margin: 0;
-      background: #f3f1e0;
-      font-family: 'Vazirmatn', sans-serif;
-      text-align: center;
-    }
-    canvas {
-      display: block;
-    }
-    .controls {
-      margin: 20px auto;
-    }
-    input[type="text"] {
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      width: 250px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #795548;
-      color: #fff;
-      cursor: pointer;
-      margin-right: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>هودی مردانه با متن دلخواه</h1>
-  <div class="controls">
-    <input type="text" id="textInput" placeholder="متن خود را وارد کنید" />
-    <button onclick="applyText()">اعمال متن</button>
+<!-- ادامه فایل اصلی شما -->
+<div class="options-container">
+  <label class="label">رنگ:</label>
+  <div class="color-picker">
+    <canvas id="colorWheel" width="200" height="200" style="border-radius: 50%; cursor: pointer;"></canvas>
   </div>
-  <div id="container"></div>
 
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.module.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.156.1/examples/jsm/loaders/GLTFLoader.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.156.1/examples/jsm/controls/OrbitControls.js';
+  <label class="label">متن دلخواه:</label>
+  <input type="text" id="textInput" placeholder="متن خود را وارد کنید" style="padding: 8px; border-radius: 8px; width: 200px;">
+  <button onclick="applyText()">اعمال متن</button>
+</div>
 
-    let scene, camera, renderer, controls, model;
-    const container = document.getElementById('container');
+<script>
+  const modelViewer = document.getElementById("hoodieModel");
+  const colorWheel = document.getElementById("colorWheel");
+  const ctx = colorWheel.getContext('2d');
 
-    init();
-    loadModel();
+  function drawColorWheel() {
+    const radius = colorWheel.width / 2;
+    const gradient = ctx.createConicGradient(0, radius, radius);
+    gradient.addColorStop(0, 'red');
+    gradient.addColorStop(0.17, 'yellow');
+    gradient.addColorStop(0.33, 'green');
+    gradient.addColorStop(0.5, 'cyan');
+    gradient.addColorStop(0.67, 'blue');
+    gradient.addColorStop(0.83, 'magenta');
+    gradient.addColorStop(1, 'red');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);
+  }
 
-    function init() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf3f1e0);
+  drawColorWheel();
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.5, 3);
+  function changeColorFromWheel(event) {
+    const rect = colorWheel.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const radius = colorWheel.width / 2;
+    const dx = x - radius;
+    const dy = y - radius;
+    const angle = Math.atan2(dy, dx);
+    const hue = (angle * 180 / Math.PI + 360) % 360;
+    const color = `hsl(${hue}, 100%, 50%)`;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      container.appendChild(renderer.domElement);
-
-      controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
-      const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-      scene.add(light);
-
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-      dirLight.position.set(2, 2, 2);
-      scene.add(dirLight);
-
-      animate();
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    function loadModel() {
-      const loader = new GLTFLoader();
-      loader.load('hoodie.glb', gltf => {
-        model = gltf.scene;
-        model.scale.set(1, 1, 1);
-        scene.add(model);
+    // تغییر رنگ فقط در صورتی که متریال موجود باشه
+    if (modelViewer.model && modelViewer.model.materials) {
+      modelViewer.model.materials.forEach(material => {
+        material.pbrMetallicRoughness.setBaseColorFactor([
+          ...hslToRgb(hue, 1, 0.5).map(v => v / 255), 1
+        ]);
       });
     }
+  }
 
-    function applyText() {
-      const text = document.getElementById('textInput').value;
-      if (!text || !model) return;
-
-      // ساخت تکسچر جدید
-      const canvas = document.createElement('canvas');
-      canvas.width = 512;
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d');
-
-      // پس‌زمینه شفاف
-      ctx.fillStyle = 'rgba(0,0,0,0)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // نوشتن متن سفید در وسط
-      ctx.font = 'bold 40px Vazirmatn';
-      ctx.fillStyle = 'white';
-      ctx.textAlign = 'center';
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-      const texture = new THREE.CanvasTexture(canvas);
-      texture.needsUpdate = true;
-
-      // اعمال تکسچر روی اولین متریال مدل
-      model.traverse(child => {
-        if (child.isMesh) {
-          child.material.map = texture;
-          child.material.needsUpdate = true;
-        }
-      });
+  function hslToRgb(h, s, l) {
+    h /= 360;
+    let r, g, b;
+    if (s == 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = function(p, q, t) {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
     }
-  </script>
-</body>
-</html>
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+  }
+
+  colorWheel.addEventListener("click", (event) => {
+    colorWheel.classList.add("clicked");
+    setTimeout(() => colorWheel.classList.remove("clicked"), 300);
+    changeColorFromWheel(event);
+  });
+
+  async function applyText() {
+    const text = document.getElementById("textInput").value;
+    if (!text || !modelViewer.model) return;
+
+    // ایجاد canvas
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = "bold 40px Vazirmatn";
+    ctx.fillStyle = "#000000";
+    ctx.textAlign = "center";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+    const imageURL = URL.createObjectURL(blob);
+
+    // بارگذاری تکسچر جدید
+    const texture = await modelViewer.createTexture(imageURL);
+
+    modelViewer.model.materials.forEach(material => {
+      material.pbrMetallicRoughness.setBaseColorTexture(texture);
+    });
+  }
+    </script>
