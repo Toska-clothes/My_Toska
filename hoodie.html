@@ -26,7 +26,7 @@
       background: #fff;
       border-radius: 20px;
     }
-    .options-container, .text-overlay {
+    .text-overlay {
       margin-top: 30px;
     }
     .label {
@@ -102,11 +102,19 @@
       ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
       // تبدیل بوم به تکسچر
-      const texture = await modelViewer.createTexture(canvas);
-      
+      const texture = await createTextureFromCanvas(canvas);
+
       // اعمال تکسچر به مدل
       const material = modelViewer.model.materials[0]; // فرض می‌کنیم مدل یک بافت برای اعمال دارد
-      material.pbrMetallicRoughness.setBaseColorTexture(texture);
+      if (material.pbrMetallicRoughness) {
+        material.pbrMetallicRoughness.setBaseColorTexture(texture);
+      }
+    }
+
+    // تابعی برای تبدیل بوم به تکسچر
+    async function createTextureFromCanvas(canvas) {
+      const texture = await modelViewer.createTexture(canvas);
+      return texture;
     }
   </script>
 </body>
