@@ -107,6 +107,7 @@
     const colorWheel = document.getElementById("colorWheel");
     const ctx = colorWheel.getContext('2d');
 
+    // ایجاد چرخ رنگ
     function drawColorWheel() {
       const radius = colorWheel.width / 2;
       const gradient = ctx.createConicGradient(0, radius, radius);
@@ -123,6 +124,7 @@
 
     drawColorWheel();
 
+    // تغییر رنگ بر اساس موقعیت کلیک
     function changeColorFromWheel(event) {
       const rect = colorWheel.getBoundingClientRect();
       const x = event.clientX - rect.left;
@@ -166,6 +168,7 @@
       changeColorFromWheel(event);
     });
 
+    // اعمال متن به مدل
     async function applyTextToModel() {
       const text = document.getElementById("customText").value;
       if (!text) return;
@@ -173,6 +176,7 @@
       await modelViewer.updateComplete;
       const material = modelViewer.model.materials[0];
 
+      // ایجاد بوم برای نوشتن متن
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
       canvas.height = 1024;
@@ -186,6 +190,7 @@
       ctx.textBaseline = "middle";
       ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
+      // تبدیل بوم به تکسچر
       const texture = await modelViewer.createTexture(canvas);
       material.pbrMetallicRoughness.setBaseColorTexture(texture);
     }
