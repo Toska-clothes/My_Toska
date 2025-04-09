@@ -38,6 +38,7 @@
       display: flex;
       justify-content: center;
       margin-bottom: 20px;
+      position: relative;
     }
     .color-wheel {
       width: 100px;
@@ -46,6 +47,10 @@
       background: conic-gradient(red, yellow, green, cyan, blue, magenta, red);
       cursor: pointer;
       border: 2px solid #ccc;
+      transition: transform 0.3s ease-in-out;
+    }
+    .color-wheel.clicked {
+      transform: scale(1.2); /* بزرگ شدن دکمه هنگام کلیک */
     }
     button {
       padding: 10px 20px;
@@ -104,7 +109,13 @@
       }
     }
 
-    colorWheel.addEventListener("click", changeColorFromWheel);
+    colorWheel.addEventListener("click", (event) => {
+      // فعال‌سازی تغییر رنگ
+      colorWheel.classList.add("clicked");
+      setTimeout(() => colorWheel.classList.remove("clicked"), 300); // بازگرداندن اندازه به حالت اولیه پس از 0.3 ثانیه
+
+      changeColorFromWheel(event); // تغییر رنگ مدل بر اساس موقعیت انتخاب
+    });
   </script>
 </body>
 </html>
