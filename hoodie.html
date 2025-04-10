@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fa">
 <head>
@@ -64,133 +65,123 @@
   </style>
 </head>
 <body>
-
-<h1>هودی مردانه</h1>
-<p>رنگ را انتخاب کنید، متن بنویسید، سپس روی مدل کلیک کنید تا متن درج شود.</p>
-
-<div class="model-container">
-  <model-viewer id="hoodieModel"
-                src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie_uv.glb"
-                alt="هودی سه‌بعدی"
-                auto-rotate
-                camera-controls
-                ar
-                exposure="1"
-                shadow-intensity="1"
-                interaction-prompt="none">
-  </model-viewer>
-</div>
-
-<div>
-  <label class="label">رنگ:</label>
-  <div class="color-picker">
-    <canvas id="colorWheel" class="color-wheel" width="200" height="200"></canvas>
+  <h1>هودی مردانه</h1>
+  <p>رنگ را انتخاب کنید، متن بنویسید، سپس روی مدل کلیک کنید تا متن درج شود.</p>
+  <div class="model-container">
+    <model-viewer id="hoodieModel"
+                  src="hoodie.glb"
+                  alt="هودی سه‌بعدی"
+                  auto-rotate
+                  camera-controls
+                  ar
+                  exposure="1"
+                  shadow-intensity="1"
+                  interaction-prompt="none">
+    </model-viewer>
   </div>
-</div>
+  <div>
+    <label class="label">رنگ:</label>
+    <div class="color-picker">
+      <canvas id="colorWheel" class="color-wheel" width="200" height="200"></canvas>
+    </div>
+  </div>
+  <div>
+    <label class="label">متن دلخواه:</label><br>
+    <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
+  </div>
 
-<div>
-  <label class="label">متن دلخواه:</label><br>
-  <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
-</div>
+  <script>
+    const modelViewer = document.getElementById("hoodieModel");
+    const colorWheel = document.getElementById("colorWheel");
+    const ctx = colorWheel.getContext('2d');
+    let customText = '';
+    let textureCanvas, textureCtx, material;
 
-<script>
-const modelViewer = document.getElementById("hoodieModel");
-const colorWheel = document.getElementById("colorWheel");
-const ctx = colorWheel.getContext('2d');
-let customText = '';
-let textureCanvas, textureCtx, material;
+    function drawColorWheel() {
+      const radius = colorWheel.width / 2;
+      const gradient = ctx.createConicGradient(0, radius, radius);
+      gradient.addColorStop(0, 'red');
+      gradient.addColorStop(0.17, 'yellow');
+      gradient.addColorStop(0.33, 'lime');
+      gradient.addColorStop(0.5, 'cyan');
+      gradient.addColorStop(0.67, 'blue');
+      gradient.addColorStop(0.83, 'magenta');
+      gradient.addColorStop(1, 'red');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);
+    }
+    drawColorWheel();
 
-// چرخ رنگ
-function drawColorWheel() {
-  const radius = colorWheel.width / 2;
-  const gradient = ctx.createConicGradient(0, radius, radius);
-  gradient.addColorStop(0, 'red');
-  gradient.addColorStop(0.17, 'yellow');
-  gradient.addColorStop(0.33, 'lime');
-  gradient.addColorStop(0.5, 'cyan');
-  gradient.addColorStop(0.67, 'blue');
-  gradient.addColorStop(0.83, 'magenta');
-  gradient.addColorStop(1, 'red');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);
-}
-drawColorWheel();
+    function hslToRgb(h, s, l) {
+      let r, g, b;
+      if (s == 0) { r = g = b = l; }
+      else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
 
-function hslToRgb(h, s, l) {
-  let r, g, b;
-  if (s == 0) { r = g = b = l; }
-  else {
-    const hue2rgb = (p, q, t) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
-    };
-    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-    const p = 2 * l - q;
-    r = hue2rgb(p, q, h + 1/3);
-    g = hue2rgb(p, q, h);
-    b = hue2rgb(p, q, h - 1/3);
-  }
-  return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
+    colorWheel.addEventListener("click", async (e) => {
+      colorWheel.classList.add("clicked");
+      setTimeout(() => colorWheel.classList.remove("clicked"), 300);
+      const rect = colorWheel.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const dx = x - 100, dy = y - 100;
+      const angle = Math.atan2(dy, dx);
+      const hue = (angle * 180 / Math.PI + 360) % 360;
+      const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
 
-colorWheel.addEventListener("click", async (e) => {
-  colorWheel.classList.add("clicked");
-  setTimeout(() => colorWheel.classList.remove("clicked"), 300);
-  const rect = colorWheel.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const dx = x - 100, dy = y - 100;
-  const angle = Math.atan2(dy, dx);
-  const hue = (angle * 180 / Math.PI + 360) % 360;
-  const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
+      await modelViewer.updateComplete;
+      material = modelViewer.model.materials[0];
+      material.pbrMetallicRoughness.setBaseColorFactor([r/255, g/255, b/255, 1]);
+    });
 
-  await modelViewer.updateComplete;
-  material = modelViewer.model.materials[0];
-  material.pbrMetallicRoughness.setBaseColorFactor([r/255, g/255, b/255, 1]);
-});
+    document.getElementById("customText").addEventListener("input", e => {
+      customText = e.target.value;
+    });
 
-// گرفتن متن کاربر
-document.getElementById("customText").addEventListener("input", e => {
-  customText = e.target.value;
-});
+    modelViewer.addEventListener("click", async (event) => {
+      if (!customText) return;
 
-// کلیک روی مدل برای افزودن متن در محل کلیک
-modelViewer.addEventListener("click", async (event) => {
-  if (!customText) return;
+      const bounds = modelViewer.getBoundingClientRect();
+      const clickX = event.clientX - bounds.left;
+      const clickY = event.clientY - bounds.top;
+      const relX = clickX / bounds.width;
+      const relY = clickY / bounds.height;
 
-  // مختصات کلیک نسبی روی مدل
-  const bounds = modelViewer.getBoundingClientRect();
-  const clickX = event.clientX - bounds.left;
-  const clickY = event.clientY - bounds.top;
-  const relX = clickX / bounds.width;
-  const relY = clickY / bounds.height;
+      if (!textureCanvas) {
+        textureCanvas = document.createElement("canvas");
+        textureCanvas.width = 1024;
+        textureCanvas.height = 1024;
+        textureCtx = textureCanvas.getContext("2d");
+        textureCtx.fillStyle = "#ffffff";
+        textureCtx.fillRect(0, 0, 1024, 1024);
+      }
 
-  // ساخت بوم و نوشتن متن در نقطه نسبی
-  if (!textureCanvas) {
-    textureCanvas = document.createElement("canvas");
-    textureCanvas.width = 1024;
-    textureCanvas.height = 1024;
-    textureCtx = textureCanvas.getContext("2d");
-    textureCtx.fillStyle = "#ffffff";
-    textureCtx.fillRect(0, 0, 1024, 1024);
-  }
+      const x = relX * 1024;
+      const y = relY * 1024;
+      textureCtx.font = "bold 64px Vazirmatn";
+      textureCtx.fillStyle = "#000000";
+      textureCtx.textAlign = "center";
+      textureCtx.textBaseline = "middle";
+      textureCtx.fillText(customText, x, y);
 
-  const x = relX * 1024;
-  const y = relY * 1024;
-  textureCtx.font = "bold 64px Vazirmatn";
-  textureCtx.fillStyle = "#000000";
-  textureCtx.textAlign = "center";
-  textureCtx.textBaseline = "middle";
-  textureCtx.fillText(customText, x, y);
-
-  const texture = await modelViewer.createTexture(textureCanvas);
-  material.pbrMetallicRoughness.setBaseColorTexture(texture);
-});
-</script>
-
+      const texture = await modelViewer.createTexture(textureCanvas);
+      material.pbrMetallicRoughness.setBaseColorTexture(texture);
+    });
+  </script>
 </body>
 </html>
