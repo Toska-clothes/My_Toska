@@ -1,12 +1,11 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>هودی مردانه | سه‌بعدی</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
@@ -14,6 +13,7 @@
       color: #3e2723;
       text-align: center;
       padding: 20px;
+      direction: rtl;
     }
     h1 { font-size: 2.2rem; }
     .model-container {
@@ -27,7 +27,10 @@
       background: #fff;
       border-radius: 20px;
     }
-    .label { margin: 10px 0 5px; font-weight: bold; }
+    .label {
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
     .color-picker {
       display: flex;
       justify-content: center;
@@ -67,28 +70,33 @@
 <body>
   <h1>هودی مردانه</h1>
   <p>رنگ را انتخاب کنید، متن بنویسید، سپس روی مدل کلیک کنید تا متن درج شود.</p>
+
   <div class="model-container">
-    <model-viewer id="hoodieModel"
-                  src="hoodie.glb"
-                  alt="هودی سه‌بعدی"
-                  auto-rotate
-                  camera-controls
-                  ar
-                  exposure="1"
-                  shadow-intensity="1"
-                  interaction-prompt="none">
+    <model-viewer
+      id="hoodieModel"
+      src="hoodie.glb"
+      alt="هودی سه‌بعدی"
+      auto-rotate
+      camera-controls
+      ar
+      exposure="1"
+      shadow-intensity="1"
+      interaction-prompt="none">
     </model-viewer>
   </div>
+
   <div>
     <label class="label">رنگ:</label>
     <div class="color-picker">
       <canvas id="colorWheel" class="color-wheel" width="200" height="200"></canvas>
     </div>
   </div>
+
   <div>
     <label class="label">متن دلخواه:</label><br>
     <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
   </div>
+
   <script>
     const modelViewer = document.getElementById("hoodieModel");
     const colorWheel = document.getElementById("colorWheel");
@@ -96,6 +104,7 @@
     let customText = '';
     let textureCanvas, textureCtx, material;
 
+    // رسم چرخ رنگ
     function drawColorWheel() {
       const radius = colorWheel.width / 2;
       const gradient = ctx.createConicGradient(0, radius, radius);
@@ -109,14 +118,12 @@
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);
     }
-
     drawColorWheel();
 
     function hslToRgb(h, s, l) {
       let r, g, b;
-      if (s == 0) {
-        r = g = b = l;
-      } else {
+      if (s == 0) { r = g = b = l; }
+      else {
         const hue2rgb = (p, q, t) => {
           if (t < 0) t += 1;
           if (t > 1) t -= 1;
@@ -144,9 +151,10 @@
       const angle = Math.atan2(dy, dx);
       const hue = (angle * 180 / Math.PI + 360) % 360;
       const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
+
       await modelViewer.updateComplete;
       material = modelViewer.model.materials[0];
-      material.pbrMetallicRoughness.setBaseColorFactor([r/255, g/255, b/255, 1]);
+      material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);
     });
 
     document.getElementById("customText").addEventListener("input", e => {
@@ -170,17 +178,4 @@
         textureCtx.fillRect(0, 0, 1024, 1024);
       }
 
-      const x = relX * 1024;
-      const y = relY * 1024;
-      textureCtx.font = "bold 64px Vazirmatn";
-      textureCtx.fillStyle = "#000000";
-      textureCtx.textAlign = "center";
-      textureCtx.textBaseline = "middle";
-      textureCtx.fillText(customText, x, y);
-
-      const texture = await modelViewer.createTexture(textureCanvas);
-      material.pbrMetallicRoughness.setBaseColorTexture(texture);
-    });
-  </script>
-</body>
-</html>
+      const x = relX * 102
