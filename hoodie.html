@@ -74,10 +74,9 @@
 <body>
   <h1>هودی مردانه</h1>
   <p>مدل را مشاهده، رنگ را انتخاب و متن دلخواه را اعمال کنید:</p>
-
   <div class="model-container">
     <model-viewer id="hoodieModel"
-      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie_uv.glb"
+      src="https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/hoodie_uv.glb"
       alt="هودی سه‌بعدی"
       auto-rotate
       camera-controls
@@ -87,20 +86,17 @@
       interaction-prompt="none">
     </model-viewer>
   </div>
-
   <div class="options-container">
     <label class="label">رنگ:</label>
     <div class="color-picker">
       <canvas id="colorWheel" width="200" height="200" class="color-wheel"></canvas>
     </div>
   </div>
-
   <div class="text-overlay">
     <label class="label">متن دلخواه:</label>
     <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
     <button onclick="applyTextToModel()">اعمال متن</button>
   </div>
-
   <script>
     const modelViewer = document.getElementById("hoodieModel");
     const colorWheel = document.getElementById("colorWheel");
@@ -189,4 +185,4 @@
     }
   </script>
 </body>
-</html>
+      </html>
