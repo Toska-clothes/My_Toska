@@ -70,6 +70,12 @@
       color: #fff;
       cursor: pointer;
     }
+    .font-size-selector {
+      margin-top: 10px;
+    }
+    .font-size-selector label {
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
@@ -99,16 +105,39 @@
     <label class="label">متن دلخواه:</label>
     <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
     <button onclick="applyTextToModel()">اعمال متن</button>
+
+    <div class="font-size-selector">
+      <label for="font-size">اندازه فونت:</label>
+      <select id="font-size" onchange="updateTextStyle()">
+        <option value="24px">کوچک</option>
+        <option value="48px">متوسط</option>
+        <option value="72px">بزرگ</option>
+      </select>
+    </div>
+
+    <div class="font-size-selector">
+      <label for="font-family">فونت:</label>
+      <select id="font-family" onchange="updateTextStyle()">
+        <option value="Vazirmatn">Vazirmatn</option>
+        <option value="Arial">Arial</option>
+        <option value="Courier">Courier</option>
+      </select>
+    </div>
+
+    <div class="font-size-selector">
+      <label for="font-color">رنگ فونت:</label>
+      <input type="color" id="font-color" value="#000000" onchange="updateTextStyle()" />
+    </div>
   </div>
 
   <script>
     const modelViewer = document.getElementById("hoodieModel");
     const colorWheel = document.getElementById("colorWheel");
     const ctx = colorWheel.getContext('2d');
-    let texts = [];
-    let dragging = false;
-    let dragObject = null;
-    let lastMousePosition = { x: 0, y: 0 };
+    let currentText = '';
+    let currentFontSize = '48px';
+    let currentFontFamily = 'Vazirmatn';
+    let currentFontColor = '#000000';
 
     function drawColorWheel() {
       const radius = colorWheel.width / 2;
@@ -169,61 +198,17 @@
       changeColorFromWheel(event);
     });
 
-    async function applyTextToModel() {
+    function applyTextToModel() {
       const text = document.getElementById("customText").value;
       if (!text) return;
 
-      await modelViewer.updateComplete;
-      const material = modelViewer.model.materials[0];
+      currentText = text;
 
       const canvas = document.createElement("canvas");
       canvas.width = 1024;
       canvas.height = 1024;
       const ctx = canvas.getContext("2d");
 
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = currentFontColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "bold 64px Vazirmatn";
-      ctx.fillStyle = "#000000";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-      const texture = await modelViewer.createTexture(canvas);
-      material.pbrMetallicRoughness.setBaseColorTexture(texture);
-
-      // اضافه کردن متن به مدل به صورت متنی جداگانه
-      const geometry = new THREE.PlaneGeometry(1, 0.5);
-      const materialText = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-      const mesh = new THREE.Mesh(geometry, materialText);
-      mesh.position.set(0, 0, 0); // موقعیت متن روی مدل
-      mesh.text = true; // مارک به عنوان متن
-      modelViewer.model.add(mesh);
-      texts.push(mesh);
-
-      // تنظیم برای جابه‌جایی متن
-      mesh.userData = { dragging: false, lastMousePosition: { x: 0, y: 0 } };
-
-      // تابع برای جابه‌جایی متن
-      mesh.onPointerDown = (event) => {
-        mesh.userData.dragging = true;
-        mesh.userData.lastMousePosition = { x: event.clientX, y: event.clientY };
-      };
-
-      mesh.onPointerMove = (event) => {
-        if (mesh.userData.dragging) {
-          const deltaX = event.clientX - mesh.userData.lastMousePosition.x;
-          const deltaY = event.clientY - mesh.userData.lastMousePosition.y;
-          mesh.position.x += deltaX * 0.01;
-          mesh.position.y -= deltaY * 0.01;
-          mesh.userData.lastMousePosition = { x: event.clientX, y: event.clientY };
-        }
-      };
-
-      mesh.onPointerUp = () => {
-        mesh.userData.dragging = false;
-      };
-    }
-  </script>
-</body>
-</html>
+      ctx.font = `bold ${currentFont
