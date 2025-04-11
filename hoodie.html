@@ -211,4 +211,26 @@
 
       ctx.fillStyle = currentFontColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.font = `bold ${currentFont
+      ctx.font = `${currentFontSize} ${currentFontFamily}`;
+      ctx.fillStyle = currentFontColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(currentText, canvas.width / 2, canvas.height / 2);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+
+      const geometry = new THREE.PlaneGeometry(2, 1);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(0, 0, 0); // موقعیت متن
+      modelViewer.model.add(mesh);
+    }
+
+    function updateTextStyle() {
+      currentFontSize = document.getElementById("font-size").value;
+      currentFontFamily = document.getElementById("font-family").value;
+      currentFontColor = document.getElementById("font-color").value;
+    }
+  </script>
+</body>
+</html>
