@@ -19,6 +19,7 @@
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
+      position: relative;
     }
     model-viewer {
       width: 100%;
@@ -52,15 +53,14 @@
       cursor: pointer;
       margin: 5px;
     }
-    #draggableText {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-      cursor: move;
+    .hotspot {
+      background: transparent;
+      color: black;
       font-size: 24px;
-      z-index: 10;
+      font-family: 'Vazirmatn', sans-serif;
+      pointer-events: auto;
+      cursor: text;
+      text-shadow: 0 0 2px white;
     }
     .color-wheel {
       width: 200px;
@@ -86,6 +86,13 @@
       exposure="1"
       shadow-intensity="1"
       interaction-prompt="none">
+      
+      <div id="hotspotText" slot="hotspot-text" class="hotspot"
+        data-position="0 1 0"
+        data-normal="0 1 0"
+        contenteditable="true">
+        متن دلخواه
+      </div>
     </model-viewer>
   </div>
 
@@ -106,8 +113,6 @@
     <button onclick="updateTextStyle()">اعمال متن</button>
   </div>
 
-  <div id="draggableText" contenteditable="true">متن دلخواه</div>
-
   <div class="options-container">
     <label class="label">رنگ لباس:</label>
     <canvas id="colorWheel" width="200" height="200" class="color-wheel"></canvas>
@@ -115,43 +120,18 @@
 
   <script>
     const modelViewer = document.getElementById("hoodieModel");
-    const draggableText = document.getElementById("draggableText");
+    const hotspotText = document.getElementById("hotspotText");
     const textInput = document.getElementById("customText");
     const colorInput = document.getElementById("textColor");
     const fontSelect = document.getElementById("fontSelector");
 
-    // Dragging
-    draggableText.onmousedown = function (event) {
-      const shiftX = event.clientX - draggableText.getBoundingClientRect().left;
-      const shiftY = event.clientY - draggableText.getBoundingClientRect().top;
-
-      function moveAt(pageX, pageY) {
-        draggableText.style.left = pageX - shiftX + 'px';
-        draggableText.style.top = pageY - shiftY + 'px';
-      }
-
-      function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
-      }
-
-      document.addEventListener('mousemove', onMouseMove);
-
-      draggableText.onmouseup = function () {
-        document.removeEventListener('mousemove', onMouseMove);
-        draggableText.onmouseup = null;
-      };
-    };
-
-    draggableText.ondragstart = () => false;
-
-    // Update text style
     function updateTextStyle() {
-      draggableText.innerText = textInput.value;
-      draggableText.style.color = colorInput.value;
-      draggableText.style.fontFamily = fontSelect.value;
+      hotspotText.innerText = textInput.value;
+      hotspotText.style.color = colorInput.value;
+      hotspotText.style.fontFamily = fontSelect.value;
     }
 
-    // Color wheel logic
+    // Color wheel rendering
     const colorWheel = document.getElementById("colorWheel");
     const ctx = colorWheel.getContext('2d');
 
