@@ -62,7 +62,7 @@
 
   <div class="model-container" id="modelContainer">
     <model-viewer id="hoodieModel"
-      src="https://cdn.jsdelivr.net/gh/Toska-clothes/My_Toska@main/hoodie.glb"
+      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
       alt="هودی سه‌بعدی"
       auto-rotate
       camera-controls
@@ -111,12 +111,15 @@
       label.style.top = `${lastClick.y}px`;
       label.style.color = color;
       label.style.fontFamily = font;
+
       label.style.position = "absolute";
       label.style.transform = "translate(-50%, -50%)";
+
       label.setAttribute("draggable", "true");
 
       label.ondblclick = () => label.remove();
 
+      // Drag & drop
       label.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", null);
         e.target.dataset.dragging = true;
