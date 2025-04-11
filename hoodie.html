@@ -194,29 +194,31 @@
 
     let isDragging = false;
 
-    hotspotText.addEventListener("mousedown", (e) => {
+    hotspotText.addEventListener("touchstart", (e) => {
       isDragging = true;
       hotspotText.style.cursor = 'grabbing';
-      const offsetX = e.clientX - hotspotText.getBoundingClientRect().left;
-      const offsetY = e.clientY - hotspotText.getBoundingClientRect().top;
+      const touch = e.touches[0];
+      const offsetX = touch.clientX - hotspotText.getBoundingClientRect().left;
+      const offsetY = touch.clientY - hotspotText.getBoundingClientRect().top;
 
-      function onMouseMove(event) {
+      function onTouchMove(event) {
         if (isDragging) {
-          const x = (event.clientX - offsetX) / window.innerWidth * 2 - 1;
-          const y = 1 - (event.clientY - offsetY) / window.innerHeight * 2;
+          const touch = event.touches[0];
+          const x = (touch.clientX - offsetX) / window.innerWidth * 2 - 1;
+          const y = 1 - (touch.clientY - offsetY) / window.innerHeight * 2;
           hotspotText.setAttribute("data-position", `${x} ${y} 0`);
         }
       }
 
-      function onMouseUp() {
+      function onTouchEnd() {
         isDragging = false;
         hotspotText.style.cursor = 'grab';
-        document.removeEventListener("mousemove", onMouseMove);
-        document.removeEventListener("mouseup", onMouseUp);
+        document.removeEventListener("touchmove", onTouchMove);
+        document.removeEventListener("touchend", onTouchEnd);
       }
 
-      document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mouseup", onMouseUp);
+      document.addEventListener("touchmove", onTouchMove);
+      document.addEventListener("touchend", onTouchEnd);
     });
   </script>
 </body>
