@@ -59,9 +59,10 @@
 <body>
   <h1>هودی مردانه</h1>
   <p>روی مدل کلیک کنید تا متن درج شود:</p>
+
   <div class="model-container" id="modelContainer">
     <model-viewer id="hoodieModel"
-      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
+      src="https://cdn.jsdelivr.net/gh/Toska-clothes/My_Toska@main/hoodie.glb"
       alt="هودی سه‌بعدی"
       auto-rotate
       camera-controls
@@ -71,6 +72,7 @@
       interaction-prompt="none">
     </model-viewer>
   </div>
+
   <div class="text-controls">
     <input type="text" id="customText" placeholder="متن دلخواه" />
     <input type="color" id="textColor" value="#000000" />
@@ -86,6 +88,7 @@
   <script>
     const modelViewer = document.getElementById("hoodieModel");
     const modelContainer = document.getElementById("modelContainer");
+
     let lastClick = { x: 0, y: 0 };
 
     modelViewer.addEventListener("click", (event) => {
@@ -111,13 +114,13 @@
       label.style.position = "absolute";
       label.style.transform = "translate(-50%, -50%)";
       label.setAttribute("draggable", "true");
+
       label.ondblclick = () => label.remove();
 
       label.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", null);
         e.target.dataset.dragging = true;
       });
-
       label.addEventListener("dragend", e => {
         const containerRect = modelContainer.getBoundingClientRect();
         const newX = e.clientX - containerRect.left;
