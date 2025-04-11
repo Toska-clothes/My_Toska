@@ -111,6 +111,7 @@
     </select>
     
     <button onclick="updateTextStyle()">اعمال متن</button>
+    <button onclick="lockTextPosition()">تثبیت متن</button>
   </div>
 
   <div class="options-container">
@@ -129,6 +130,13 @@
       hotspotText.innerText = textInput.value;
       hotspotText.style.color = colorInput.value;
       hotspotText.style.fontFamily = fontSelect.value;
+    }
+
+    function lockTextPosition() {
+      // تثبیت موقعیت متن (یعنی حفظ موقعیت فعلی)
+      const position = hotspotText.getAttribute("data-position");
+      console.log("موقعیت نهایی متن: ", position);
+      // اینجا می‌تونید در صورت نیاز ذخیره یا ارسال اطلاعات به سرور انجام بدید
     }
 
     // Color wheel rendering
@@ -193,32 +201,43 @@
     });
 
     let isDragging = false;
+    let startX, startY, offsetX, offsetY;
 
     hotspotText.addEventListener("touchstart", (e) => {
       isDragging = true;
-      hotspotText.style.cursor = 'grabbing';
       const touch = e.touches[0];
-      const offsetX = touch.clientX - hotspotText.getBoundingClientRect().left;
-      const offsetY = touch.clientY - hotspotText.getBoundingClientRect().top;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      const rect = hotspotText.getBoundingClientRect();
+      offsetX = startX - rect.left;
+      offsetY = startY - rect.top;
+      hotspotText.style.cursor = 'grabbing';
+      e.preventDefault(); // Prevent default touch behavior (scroll, zoom, etc.)
+    });
 
-      function onTouchMove(event) {
-        if (isDragging) {
-          const touch = event.touches[0];
-          const x = (touch.clientX - offsetX) / window.innerWidth * 2 - 1;
-          const y = 1 - (touch.clientY - offsetY) / window.innerHeight * 2;
-          hotspotText.setAttribute("data-position", `${x} ${y} 0`);
-        }
-      }
+    hotspotText.addEventListener("touchmove", (e) => {
+      if (!isDragging) return;
 
-      function onTouchEnd() {
-        isDragging = false;
-        hotspotText.style.cursor = 'grab';
-        document.removeEventListener("touchmove", onTouchMove);
-        document.removeEventListener("touchend", onTouchEnd);
-      }
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
 
-      document.addEventListener("touchmove", onTouchMove);
-      document.addEventListener("touchend", onTouchEnd);
+      // Update the position based on the difference in touch movement
+      const newX = (deltaX / window.innerWidth) * 2 - 1;
+      const newY = 1 - (deltaY / window.innerHeight) * 2;
+
+      hotspotText.setAttribute("data-position", `${newX} ${newY} 0`);
+
+      // Update starting coordinates for the next movement
+      startX = touch.clientX;
+      startY = touch.clientY;
+
+      e.preventDefault();
+    });
+
+    hotspotText.addEventListener("touchend", () => {
+      isDragging = false;
+      hotspotText.style.cursor = 'grab';
     });
   </script>
 </body>
