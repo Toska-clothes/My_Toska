@@ -1,152 +1,91 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>شخصی‌سازی هودی</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <style>
     body {
       margin: 0;
+      background-color: #eee;
+      font-family: sans-serif;
       overflow: hidden;
-      direction: rtl;
-      font-family: Tahoma;
     }
-    #ui {
+    #container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+    }
+    .label {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 15px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 8px;
+      padding: 4px 8px;
+      pointer-events: none;
+      white-space: nowrap;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    #textOptions {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
       border-radius: 10px;
-      display: none;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
       z-index: 10;
     }
-    #ui input, #ui select, #ui button {
-      margin-bottom: 10px;
-      padding: 5px;
-      width: 100%;
-    }
-    canvas { display: block; }
   </style>
 </head>
 <body>
-  <div id="ui">
-    <input type="text" id="textInput" placeholder="متن دلخواه..." />
-    <input type="color" id="colorPicker" value="#000000" />
-    <select id="fontSelect">
-      <option value="Vazirmatn">Vazirmatn</option>
-      <option value="Tahoma">Tahoma</option>
-      <option value="Sahel">Sahel</option>
-      <option value="Shabnam">Shabnam</option>
-    </select>
-    <button id="addText">ثبت متن</button>
-  </div>  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>  <script>
-    let scene, camera, renderer, model;
-    let raycaster = new THREE.Raycaster();
-    let mouse = new THREE.Vector2();
-    let selectedPoint = null;
+  <div id="container">
+    <model-viewer id="model" src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb" camera-controls auto-rotate></model-viewer>
+    <div id="textOptions" style="display:none;">
+      <input id="textInput" type="text" placeholder="متن..." />
+      <select id="fontSelect">
+        <option value="sans-serif">Sans</option>
+        <option value="serif">Serif</option>
+        <option value="monospace">Mono</option>
+      </select>
+      <input type="color" id="colorInput" value="#000000" />
+      <button onclick="addLabel()">افزودن</button>
+    </div>
+  </div>
 
-    init();
+  <script>
+    const viewer = document.getElementById("model");
+    const textOptions = document.getElementById("textOptions");
+    let clickPosition = { x: 0, y: 0 };
 
-    function init() {
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
-      camera.position.set(0, 1.5, 3);
+    viewer.addEventListener("click", (event) => {
+      clickPosition = { x: event.clientX, y: event.clientY };
+      textOptions.style.display = "block";
+    });
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      const light = new THREE.HemisphereLight(0xffffff, 0x444444);
-      scene.add(light);
-
-      const loader = new THREE.GLTFLoader();
-      loader.load('hoodie.glb', (gltf) => {
-        model = gltf.scene;
-        model.scale.set(1.5, 1.5, 1.5);
-        scene.add(model);
-      });
-
-      window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-      });
-
-      window.addEventListener('click', onClick);
-      document.getElementById("addText").addEventListener("click", applyText);
-
-      animate();
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      renderer.render(scene, camera);
-    }
-
-    function onClick(event) {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      if (!model) return;
-
-      const intersects = raycaster.intersectObject(model, true);
-      if (intersects.length > 0) {
-        selectedPoint = intersects[0].point;
-        document.getElementById("ui").style.display = "block";
-      }
-    }
-
-    function applyText() {
+    function addLabel() {
       const text = document.getElementById("textInput").value;
-      const color = document.getElementById("colorPicker").value;
+      const color = document.getElementById("colorInput").value;
       const font = document.getElementById("fontSelect").value;
 
-      const canvas = document.createElement("canvas");
-      canvas.width = 256;
-      canvas.height = 128;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "rgba(255,255,255,0)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = color;
-      ctx.font = `bold 28px ${font}`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      const label = document.createElement("div");
+      label.className = "label";
+      label.innerText = text;
+      label.style.color = color;
+      label.style.fontFamily = font;
+      label.style.left = `${clickPosition.x}px`;
+      label.style.top = `${clickPosition.y}px`;
 
-      const texture = new THREE.CanvasTexture(canvas);
-      const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
-      const geometry = new THREE.PlaneGeometry(0.5, 0.25);
-      const plane = new THREE.Mesh(geometry, material);
-      plane.position.copy(selectedPoint);
-      plane.lookAt(camera.position);
-
-      plane.userData = { text, color, font };
-      plane.cursor = 'pointer';
-
-      plane.onClick = () => {
-        const confirmEdit = confirm("می‌خواهید متن را حذف کنید؟");
-        if (confirmEdit) scene.remove(plane);
-      };
-
-      scene.add(plane);
-      document.getElementById("ui").style.display = "none";
+      label.ondblclick = () => label.remove();
+      document.getElementById("container").appendChild(label);
+      textOptions.style.display = "none";
     }
-
-    // حذف متن با کلیک روی Plane
-    window.addEventListener('dblclick', function(e) {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      const intersects = raycaster.intersectObjects(scene.children, true);
-      for (let i = 0; i < intersects.length; i++) {
-        const obj = intersects[i].object;
-        if (obj.geometry && obj.geometry.type === 'PlaneGeometry') {
-          if (confirm("حذف این متن؟")) {
-            scene.remove(obj);
-          }
-          break;
-        }
-      }
-    });
-  </script></body>
+  </script>
+</body>
 </html>
