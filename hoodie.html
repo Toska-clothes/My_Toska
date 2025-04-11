@@ -59,7 +59,7 @@
       font-size: 24px;
       font-family: 'Vazirmatn', sans-serif;
       pointer-events: auto;
-      cursor: grab;
+      cursor: text;
       text-shadow: 0 0 2px white;
     }
     .color-wheel {
@@ -96,6 +96,23 @@
     </model-viewer>
   </div>
 
+  <div class="text-overlay">
+    <label class="label">متن دلخواه:</label>
+    <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
+    
+    <label class="label">رنگ متن:</label>
+    <input type="color" id="textColor" value="#000000" />
+    
+    <label class="label">فونت:</label>
+    <select id="fontSelector">
+      <option value="Vazirmatn">Vazirmatn</option>
+      <option value="Roboto">Roboto</option>
+      <option value="Lalezar">Lalezar</option>
+    </select>
+    
+    <button onclick="updateTextStyle()">اعمال متن</button>
+  </div>
+
   <div class="options-container">
     <label class="label">رنگ لباس:</label>
     <canvas id="colorWheel" width="200" height="200" class="color-wheel"></canvas>
@@ -103,6 +120,18 @@
 
   <script>
     const modelViewer = document.getElementById("hoodieModel");
+    const hotspotText = document.getElementById("hotspotText");
+    const textInput = document.getElementById("customText");
+    const colorInput = document.getElementById("textColor");
+    const fontSelect = document.getElementById("fontSelector");
+
+    function updateTextStyle() {
+      hotspotText.innerText = textInput.value;
+      hotspotText.style.color = colorInput.value;
+      hotspotText.style.fontFamily = fontSelect.value;
+    }
+
+    // Color wheel rendering
     const colorWheel = document.getElementById("colorWheel");
     const ctx = colorWheel.getContext('2d');
 
@@ -155,7 +184,6 @@
       const hue = (angle * 180 / Math.PI + 360) % 360;
       const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
 
-      // تغییر رنگ هودی
       modelViewer.addEventListener("load", () => {
         const materials = modelViewer.model.materials;
         materials.forEach(material => {
