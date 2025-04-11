@@ -3,88 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>شخصی‌سازی هودی</title>
+  <title>هودی مردانه | نمایش سه‌بعدی</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     body {
-      margin: 0;
-      background-color: #eee;
-      font-family: sans-serif;
-      overflow: hidden;
+      font-family: 'Vazirmatn', sans-serif;
+      background-color: #f3f1e0;
+      color: #3e2723;
+      text-align: center;
+      padding: 20px;
     }
-    #container {
-      width: 100vw;
-      height: 100vh;
+    h1 { font-size: 2.2rem; }
+    .model-container {
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
       position: relative;
     }
     model-viewer {
       width: 100%;
       height: 100%;
+      background: #fff;
+      border-radius: 20px;
     }
     .label {
       position: absolute;
-      background: rgba(255,255,255,0.8);
-      border-radius: 8px;
-      padding: 4px 8px;
-      pointer-events: none;
-      white-space: nowrap;
+      pointer-events: auto;
       font-size: 1rem;
       font-weight: bold;
+      cursor: move;
+      user-select: none;
     }
-    #textOptions {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      border-radius: 10px;
+    .text-controls {
+      margin-top: 30px;
+    }
+    input[type="text"], select, input[type="color"] {
       padding: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      z-index: 10;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #795548;
+      color: #fff;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <model-viewer id="model" src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb" camera-controls auto-rotate></model-viewer>
-    <div id="textOptions" style="display:none;">
-      <input id="textInput" type="text" placeholder="متن..." />
-      <select id="fontSelect">
-        <option value="sans-serif">Sans</option>
-        <option value="serif">Serif</option>
-        <option value="monospace">Mono</option>
-      </select>
-      <input type="color" id="colorInput" value="#000000" />
-      <button onclick="addLabel()">افزودن</button>
-    </div>
+  <h1>هودی مردانه</h1>
+  <p>روی مدل کلیک کنید تا متن درج شود:</p>
+
+  <div class="model-container" id="modelContainer">
+    <model-viewer id="hoodieModel"
+      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
+      alt="هودی سه‌بعدی"
+      auto-rotate
+      camera-controls
+      ar
+      exposure="1"
+      shadow-intensity="1"
+      interaction-prompt="none">
+    </model-viewer>
+  </div>
+
+  <div class="text-controls">
+    <input type="text" id="customText" placeholder="متن دلخواه" />
+    <input type="color" id="textColor" value="#000000" />
+    <select id="fontSelect">
+      <option value="Vazirmatn">Vazirmatn</option>
+      <option value="Arial">Arial</option>
+      <option value="Courier New">Courier New</option>
+      <option value="Tahoma">Tahoma</option>
+    </select>
+    <button onclick="addTextLabel()">افزودن متن</button>
   </div>
 
   <script>
-    const viewer = document.getElementById("model");
-    const textOptions = document.getElementById("textOptions");
-    let clickPosition = { x: 0, y: 0 };
+    const modelViewer = document.getElementById("hoodieModel");
+    const modelContainer = document.getElementById("modelContainer");
 
-    viewer.addEventListener("click", (event) => {
-      clickPosition = { x: event.clientX, y: event.clientY };
-      textOptions.style.display = "block";
+    let lastClick = { x: 0, y: 0 };
+
+    modelViewer.addEventListener("click", (event) => {
+      const bounds = modelViewer.getBoundingClientRect();
+      lastClick.x = event.clientX - bounds.left;
+      lastClick.y = event.clientY - bounds.top;
     });
 
-    function addLabel() {
-      const text = document.getElementById("textInput").value;
-      const color = document.getElementById("colorInput").value;
+    function addTextLabel() {
+      const text = document.getElementById("customText").value;
+      const color = document.getElementById("textColor").value;
       const font = document.getElementById("fontSelect").value;
+
+      if (!text) return;
 
       const label = document.createElement("div");
       label.className = "label";
-      label.innerText = text;
+      label.textContent = text;
+      label.style.left = `${lastClick.x}px`;
+      label.style.top = `${lastClick.y}px`;
       label.style.color = color;
       label.style.fontFamily = font;
-      label.style.left = `${clickPosition.x}px`;
-      label.style.top = `${clickPosition.y}px`;
+
+      label.style.position = "absolute";
+      label.style.transform = "translate(-50%, -50%)";
+
+      label.setAttribute("draggable", "true");
 
       label.ondblclick = () => label.remove();
-      document.getElementById("container").appendChild(label);
-      textOptions.style.display = "none";
+
+      // Drag & drop
+      label.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", null);
+        e.target.dataset.dragging = true;
+      });
+      label.addEventListener("dragend", e => {
+        const containerRect = modelContainer.getBoundingClientRect();
+        const newX = e.clientX - containerRect.left;
+        const newY = e.clientY - containerRect.top;
+        label.style.left = `${newX}px`;
+        label.style.top = `${newY}px`;
+        label.dataset.dragging = false;
+      });
+
+      modelContainer.appendChild(label);
     }
   </script>
 </body>
