@@ -1,182 +1,184 @@
-<!DOCTYPE html><html lang="fa"><head>    <meta charset="UTF-8" />      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>    
-  <title>هودی مردانه | نمایش سه‌بعدی</title>    
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>    
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">    
-  <style>    
-    body {    
-      font-family: 'Vazirmatn', sans-serif;    
-      background-color: #f3f1e0;    
-      color: #3e2723;    
-      text-align: center;    
-      padding: 20px;    
-    }    
-    h1 { font-size: 2.2rem; }    
-    .model-container {    
-      margin: 20px auto;    
-      max-width: 600px;    
-      height: 500px;    
-    }    
-    model-viewer {    
-      width: 100%;    
-      height: 100%;    
-      background: #fff;    
-      border-radius: 20px;    
-    }    
-    .options-container, .text-overlay {    
-      margin-top: 30px;    
-    }    
-    .label {    
-      display: block;    
-      margin: 10px 0 5px;    
-      font-weight: bold;    
-    }    
-    .color-picker {    
-      display: flex;    
-      justify-content: center;    
-      margin-bottom: 20px;    
-      position: relative;    
-    }    
-    .color-wheel {    
-      width: 200px;    
-      height: 200px;    
-      border-radius: 50%;    
-      background: conic-gradient(red, yellow, green, cyan, blue, magenta, red);    
-      cursor: pointer;    
-      border: 2px solid #ccc;    
-      transition: transform 0.3s ease-in-out;    
-    }    
-    .color-wheel.clicked {    
-      transform: scale(2.5);    
-      transition: transform 0.3s ease-in-out;    
-    }    
-    input[type="text"] {    
-      padding: 10px;    
-      font-size: 1rem;    
-      width: 250px;    
-      border-radius: 8px;    
-      border: 1px solid #ccc;    
-      margin-bottom: 10px;    
-    }    
-    button {    
-      padding: 10px 20px;    
-      font-size: 1rem;    
-      border: none;    
-      border-radius: 8px;    
-      background-color: #795548;    
-      color: #fff;    
-      cursor: pointer;    
-    }    
-  </style>    
-</head>    
-<body>    
-  <h1>هودی مردانه</h1>    
-  <p>مدل را مشاهده، رنگ را انتخاب و متن دلخواه را اعمال کنید:</p>  <div class="model-container">    
-    <model-viewer id="hoodieModel"    
-                  src="hoodie.glb"    
-                  alt="هودی سه‌بعدی"    
-                  auto-rotate    
-                  camera-controls    
-                  ar    
-                  exposure="1"    
-                  shadow-intensity="1"    
-                  interaction-prompt="none">    
-    </model-viewer>    
-  </div>  <div class="options-container">    
-    <label class="label">رنگ:</label>    
-    <div class="color-picker">    
-      <canvas id="colorWheel" width="200" height="200" style="border-radius: 50%; cursor: pointer;"></canvas>    
-    </div>    
-  </div>  <div class="text-overlay">    
-    <label class="label">متن دلخواه:</label>    
-    <input type="text" id="customText" placeholder="متن خود را وارد کنید" />    
-    <button onclick="applyTextToModel()">اعمال متن</button>    
-  </div>  <script>    
-    const modelViewer = document.getElementById("hoodieModel");    
-    const colorWheel = document.getElementById("colorWheel");    
-    const ctx = colorWheel.getContext('2d');// ایجاد چرخ رنگ    
-function drawColorWheel() {    
-  const radius = colorWheel.width / 2;    
-  const gradient = ctx.createConicGradient(0, radius, radius);    
-  gradient.addColorStop(0, 'red');    
-  gradient.addColorStop(0.17, 'yellow');    
-  gradient.addColorStop(0.33, 'green');    
-  gradient.addColorStop(0.5, 'cyan');    
-  gradient.addColorStop(0.67, 'blue');    
-  gradient.addColorStop(0.83, 'magenta');    
-  gradient.addColorStop(1, 'red');    
-  ctx.fillStyle = gradient;    
-  ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);    
-}  drawColorWheel();  // تغییر رنگ بر اساس موقعیت کلیک
-function changeColorFromWheel(event) {
-const rect = colorWheel.getBoundingClientRect();
-const x = event.clientX - rect.left;
-const y = event.clientY - rect.top;
-const radius = colorWheel.width / 2;
-const dx = x - radius;
-const dy = y - radius;
-const angle = Math.atan2(dy, dx);
-const hue = (angle * 180 / Math.PI + 360) % 360;
-const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
-modelViewer.model.materials.forEach(material => {
-material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);
-});
-}
-
-function hslToRgb(h, s, l) {
-let r, g, b;
-if (s == 0) {
-r = g = b = l;
-} else {
-const hue2rgb = function(p, q, t) {
-if (t < 0) t += 1;
-if (t > 1) t -= 1;
-if (t < 1/6) return p + (q - p) * 6 * t;
-if (t < 1/2) return q;
-if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-return p;
-};
-const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-const p = 2 * l - q;
-r = hue2rgb(p, q, h + 1/3);
-g = hue2rgb(p, q, h);
-b = hue2rgb(p, q, h - 1/3);
-}
-return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
-}
-
-colorWheel.addEventListener("click", (event) => {
-colorWheel.classList.add("clicked");
-setTimeout(() => colorWheel.classList.remove("clicked"), 300);
-changeColorFromWheel(event);
-});
-
-// اعمال متن به مدل
-async function applyTextToModel() {
-const text = document.getElementById("customText").value;
-if (!text) return;
-
-await modelViewer.updateComplete;
-const material = modelViewer.model.materials[0];
-
-// ایجاد بوم برای نوشتن متن
-const canvas = document.createElement("canvas");
-canvas.width = 1024;
-canvas.height = 1024;
-const ctx = canvas.getContext("2d");
-
-ctx.fillStyle = "#ffffff";
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-ctx.font = "bold 64px Vazirmatn";
-ctx.fillStyle = "#000000";
-ctx.textAlign = "center";
-ctx.textBaseline = "middle";
-ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-// تبدیل بوم به تکسچر
-const texture = await modelViewer.createTexture(canvas);
-material.pbrMetallicRoughness.setBaseColorTexture(texture);
-}
-
-</script></body>
-
+<!DOCTYPE html>  <html lang="fa">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
+  <title>هودی مردانه | نمایش سه‌بعدی</title>  
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>  
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">  
+  <style>  
+    body {  
+      font-family: 'Vazirmatn', sans-serif;  
+      background-color: #f3f1e0;  
+      color: #3e2723;  
+      text-align: center;  
+      padding: 20px;  
+    }  
+    h1 { font-size: 2.2rem; }  
+    .model-container {  
+      margin: 20px auto;  
+      max-width: 600px;  
+      height: 500px;  
+    }  
+    model-viewer {  
+      width: 100%;  
+      height: 100%;  
+      background: #fff;  
+      border-radius: 20px;  
+    }  
+    .options-container, .text-overlay {  
+      margin-top: 30px;  
+    }  
+    .label {  
+      display: block;  
+      margin: 10px 0 5px;  
+      font-weight: bold;  
+    }  
+    .color-picker {  
+      display: flex;  
+      justify-content: center;  
+      margin-bottom: 20px;  
+      position: relative;  
+    }  
+    .color-wheel {  
+      width: 200px;  
+      height: 200px;  
+      border-radius: 50%;  
+      background: conic-gradient(red, yellow, green, cyan, blue, magenta, red);  
+      cursor: pointer;  
+      border: 2px solid #ccc;  
+      transition: transform 0.3s ease-in-out;  
+    }  
+    .color-wheel.clicked {  
+      transform: scale(2.5);  
+      transition: transform 0.3s ease-in-out;  
+    }  
+    input[type="text"] {  
+      padding: 10px;  
+      font-size: 1rem;  
+      width: 250px;  
+      border-radius: 8px;  
+      border: 1px solid #ccc;  
+      margin-bottom: 10px;  
+    }  
+    button {  
+      padding: 10px 20px;  
+      font-size: 1rem;  
+      border: none;  
+      border-radius: 8px;  
+      background-color: #795548;  
+      color: #fff;  
+      cursor: pointer;  
+    }  
+  </style>  
+</head>  
+<body>  
+  <h1>هودی مردانه</h1>  
+  <p>مدل را مشاهده، رنگ را انتخاب و متن دلخواه را اعمال کنید:</p>    <div class="model-container">  
+    <model-viewer id="hoodieModel"  
+                  src="hoodie.glb"  
+                  alt="هودی سه‌بعدی"  
+                  auto-rotate  
+                  camera-controls  
+                  ar  
+                  exposure="1"  
+                  shadow-intensity="1"  
+                  interaction-prompt="none">  
+    </model-viewer>  
+  </div>    <div class="options-container">  
+    <label class="label">رنگ:</label>  
+    <div class="color-picker">  
+      <canvas id="colorWheel" width="200" height="200" style="border-radius: 50%; cursor: pointer;"></canvas>  
+    </div>  
+  </div>    <div class="text-overlay">  
+    <label class="label">متن دلخواه:</label>  
+    <input type="text" id="customText" placeholder="متن خود را وارد کنید" />  
+    <button onclick="applyTextToModel()">اعمال متن</button>  
+  </div>    <script>  
+    const modelViewer = document.getElementById("hoodieModel");  
+    const colorWheel = document.getElementById("colorWheel");  
+    const ctx = colorWheel.getContext('2d');  
+  
+    function drawColorWheel() {  
+      const radius = colorWheel.width / 2;  
+      const gradient = ctx.createConicGradient(0, radius, radius);  
+      gradient.addColorStop(0, 'red');  
+      gradient.addColorStop(0.17, 'yellow');  
+      gradient.addColorStop(0.33, 'green');  
+      gradient.addColorStop(0.5, 'cyan');  
+      gradient.addColorStop(0.67, 'blue');  
+      gradient.addColorStop(0.83, 'magenta');  
+      gradient.addColorStop(1, 'red');  
+      ctx.fillStyle = gradient;  
+      ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);  
+    }  
+  
+    drawColorWheel();  
+  
+    function changeColorFromWheel(event) {  
+      const rect = colorWheel.getBoundingClientRect();  
+      const x = event.clientX - rect.left;  
+      const y = event.clientY - rect.top;  
+      const radius = colorWheel.width / 2;  
+      const dx = x - radius;  
+      const dy = y - radius;  
+      const angle = Math.atan2(dy, dx);  
+      const hue = (angle * 180 / Math.PI + 360) % 360;  
+      const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);  
+      modelViewer.model.materials.forEach(material => {  
+        material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);  
+      });  
+    }  
+  
+    function hslToRgb(h, s, l) {  
+      let r, g, b;  
+      if (s == 0) {  
+        r = g = b = l;  
+      } else {  
+        const hue2rgb = function(p, q, t) {  
+          if (t < 0) t += 1;  
+          if (t > 1) t -= 1;  
+          if (t < 1/6) return p + (q - p) * 6 * t;  
+          if (t < 1/2) return q;  
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;  
+          return p;  
+        };  
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;  
+        const p = 2 * l - q;  
+        r = hue2rgb(p, q, h + 1/3);  
+        g = hue2rgb(p, q, h);  
+        b = hue2rgb(p, q, h - 1/3);  
+      }  
+      return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];  
+    }  
+  
+    colorWheel.addEventListener("click", (event) => {  
+      colorWheel.classList.add("clicked");  
+      setTimeout(() => colorWheel.classList.remove("clicked"), 300);  
+      changeColorFromWheel(event);  
+    });  
+  
+    async function applyTextToModel() {  
+      const text = document.getElementById("customText").value;  
+      if (!text) return;  
+  
+      await modelViewer.updateComplete;  
+      const material = modelViewer.model.materials[0];  
+  
+      const canvas = document.createElement("canvas");  
+      canvas.width = 1024;  
+      canvas.height = 1024;  
+      const ctx = canvas.getContext("2d");  
+  
+      ctx.fillStyle = "#ffffff";  
+      ctx.fillRect(0, 0, canvas.width, canvas.height);  
+      ctx.font = "bold 64px Vazirmatn";  
+      ctx.fillStyle = "#000000";  
+      ctx.textAlign = "center";  
+      ctx.textBaseline = "middle";  
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);  
+  
+      const texture = await modelViewer.createTexture(canvas);  
+      material.pbrMetallicRoughness.setBaseColorTexture(texture);  
+    }  
+  </script>  </body>  
 </html>
