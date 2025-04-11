@@ -62,6 +62,12 @@
       cursor: grab;
       text-shadow: 0 0 2px white;
     }
+    .hotspot-container {
+      position: absolute;
+      border: 2px dashed #795548;
+      padding: 10px;
+      box-sizing: border-box;
+    }
     .color-wheel {
       width: 200px;
       height: 200px;
@@ -126,17 +132,27 @@
     const colorInput = document.getElementById("textColor");
     const fontSelect = document.getElementById("fontSelector");
 
+    let isTextFixed = false;
+
     function updateTextStyle() {
       hotspotText.innerText = textInput.value;
       hotspotText.style.color = colorInput.value;
       hotspotText.style.fontFamily = fontSelect.value;
+      // ایجاد مستطیل اطراف متن
+      hotspotText.style.display = "block"; // نمایش متن
+      const hotspotContainer = document.createElement('div');
+      hotspotContainer.classList.add('hotspot-container');
+      hotspotText.parentNode.insertBefore(hotspotContainer, hotspotText);
+      hotspotContainer.appendChild(hotspotText);
     }
 
     function lockTextPosition() {
-      // تثبیت موقعیت متن (یعنی حفظ موقعیت فعلی)
-      const position = hotspotText.getAttribute("data-position");
-      console.log("موقعیت نهایی متن: ", position);
-      // اینجا می‌تونید در صورت نیاز ذخیره یا ارسال اطلاعات به سرور انجام بدید
+      isTextFixed = true;
+      // حذف مستطیل بعد از تثبیت
+      const hotspotContainer = hotspotText.parentNode;
+      if (hotspotContainer && hotspotContainer.classList.contains('hotspot-container')) {
+        hotspotContainer.style.display = 'none';
+      }
     }
 
     // Color wheel rendering
@@ -204,41 +220,10 @@
     let startX, startY, offsetX, offsetY;
 
     hotspotText.addEventListener("touchstart", (e) => {
+      if (isTextFixed) return; // اگر متن تثبیت شده باشد، جابجایی متوقف می‌شود
       isDragging = true;
       const touch = e.touches[0];
       startX = touch.clientX;
       startY = touch.clientY;
       const rect = hotspotText.getBoundingClientRect();
-      offsetX = startX - rect.left;
-      offsetY = startY - rect.top;
-      hotspotText.style.cursor = 'grabbing';
-      e.preventDefault(); // Prevent default touch behavior (scroll, zoom, etc.)
-    });
-
-    hotspotText.addEventListener("touchmove", (e) => {
-      if (!isDragging) return;
-
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - startX;
-      const deltaY = touch.clientY - startY;
-
-      // Update the position based on the difference in touch movement
-      const newX = (deltaX / window.innerWidth) * 2 - 1;
-      const newY = 1 - (deltaY / window.innerHeight) * 2;
-
-      hotspotText.setAttribute("data-position", `${newX} ${newY} 0`);
-
-      // Update starting coordinates for the next movement
-      startX = touch.clientX;
-      startY = touch.clientY;
-
-      e.preventDefault();
-    });
-
-    hotspotText.addEventListener("touchend", () => {
-      isDragging = false;
-      hotspotText.style.cursor = 'grab';
-    });
-  </script>
-</body>
-</html>
+      offsetX = startX -
