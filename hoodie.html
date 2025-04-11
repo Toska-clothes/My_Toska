@@ -59,7 +59,7 @@
       font-size: 24px;
       font-family: 'Vazirmatn', sans-serif;
       pointer-events: auto;
-      cursor: text;
+      cursor: grab;
       text-shadow: 0 0 2px white;
     }
     .color-wheel {
@@ -190,6 +190,33 @@
           material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);
         });
       });
+    });
+
+    let isDragging = false;
+
+    hotspotText.addEventListener("mousedown", (e) => {
+      isDragging = true;
+      hotspotText.style.cursor = 'grabbing';
+      const offsetX = e.clientX - hotspotText.getBoundingClientRect().left;
+      const offsetY = e.clientY - hotspotText.getBoundingClientRect().top;
+
+      function onMouseMove(event) {
+        if (isDragging) {
+          const x = (event.clientX - offsetX) / window.innerWidth * 2 - 1;
+          const y = 1 - (event.clientY - offsetY) / window.innerHeight * 2;
+          hotspotText.setAttribute("data-position", `${x} ${y} 0`);
+        }
+      }
+
+      function onMouseUp() {
+        isDragging = false;
+        hotspotText.style.cursor = 'grab';
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      }
+
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
     });
   </script>
 </body>
