@@ -2,75 +2,106 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی سه‌بعدی با متن دلخواه</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>هودی مردانه | نمایش سه‌بعدی</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn&family=Roboto&family=Tahoma&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background-color: #f9f9f9;
+      background-color: #f3f1e0;
+      color: #3e2723;
       text-align: center;
       padding: 20px;
+      position: relative;
+    }
+    h1 { font-size: 2.2rem; }
+    .model-container {
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
+      position: relative;
     }
     model-viewer {
       width: 100%;
-      max-width: 600px;
-      height: 500px;
-      background-color: #fff;
-      border-radius: 16px;
+      height: 100%;
+      background: #fff;
+      border-radius: 20px;
     }
-    #canvasOverlay {
-      position: absolute;
-      left: 50%;
-      top: 300px;
-      transform: translateX(-50%);
-      z-index: 2;
-      pointer-events: none;
+    .text-overlay {
+      margin-top: 30px;
     }
-    .draggable {
+    .label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    .draggable-text {
       position: absolute;
       cursor: move;
-      user-select: none;
+      font-size: 20px;
       z-index: 3;
+      user-select: none;
+      pointer-events: auto;
     }
-    .controls {
+    .options-container, .text-overlay {
+      margin-top: 30px;
+    }
+    input[type="text"], select {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin: 5px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #795548;
+      color: #fff;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .color-picker {
+      display: flex;
+      justify-content: center;
       margin-top: 20px;
     }
-    .controls > * {
-      margin: 10px;
-    }
     #colorWheel {
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
-      cursor: pointer;
       border: 2px solid #ccc;
-      transition: transform 0.3s ease;
-    }
-    #colorWheel.clicked {
-      transform: scale(2.5);
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>هودی سه‌بعدی</h1>
 
-  <div style="position: relative; display: inline-block;">
-    <model-viewer id="viewer" src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
+  <h1>هودی مردانه</h1>
+  <p>مدل را مشاهده، رنگ را انتخاب و متن دلخواه را اعمال کنید:</p>
+
+  <div class="model-container">
+    <model-viewer id="hoodieModel"
+                  src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb"
                   alt="هودی سه‌بعدی"
                   auto-rotate
                   camera-controls
                   ar
-                  shadow-intensity="1"
                   exposure="1"
-                  crossorigin="anonymous">
+                  shadow-intensity="1"
+                  interaction-prompt="none">
     </model-viewer>
-    <div id="canvasOverlay"></div>
+    <div id="textLayer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>
   </div>
 
-  <div class="controls">
-    <input type="text" id="customText" placeholder="متن دلخواه" />
-    <input type="color" id="textColor" />
-    <select id="fontSelector">
+  <div class="text-overlay">
+    <label class="label">متن دلخواه:</label>
+    <input type="text" id="customText" placeholder="متن خود را وارد کنید" />
+    <input type="color" id="textColor" value="#000000" />
+    <select id="textFont">
       <option value="Vazirmatn">Vazirmatn</option>
       <option value="Roboto">Roboto</option>
       <option value="Tahoma">Tahoma</option>
@@ -78,58 +109,68 @@
     <button onclick="addText()">افزودن متن</button>
   </div>
 
-  <h3>رنگ لباس</h3>
-  <canvas id="colorWheel" width="200" height="200"></canvas>
+  <div class="options-container">
+    <label class="label">رنگ لباس:</label>
+    <div class="color-picker">
+      <canvas id="colorWheel"></canvas>
+    </div>
+  </div>
 
   <script>
-    const canvasOverlay = document.getElementById("canvasOverlay");
-    const viewer = document.getElementById("viewer");
+    const modelViewer = document.getElementById("hoodieModel");
+    const textLayer = document.getElementById("textLayer");
 
     function addText() {
       const text = document.getElementById("customText").value;
       const color = document.getElementById("textColor").value;
-      const font = document.getElementById("fontSelector").value;
+      const font = document.getElementById("textFont").value;
+
+      if (!text) return;
 
       const span = document.createElement("span");
-      span.className = "draggable";
       span.textContent = text;
+      span.className = "draggable-text";
       span.style.color = color;
       span.style.fontFamily = font;
-      span.style.fontSize = "20px";
-      span.style.top = "0px";
-      span.style.left = "0px";
+      span.style.left = "50%";
+      span.style.top = "50%";
+      span.style.transform = "translate(-50%, -50%)";
 
       makeDraggable(span);
-      canvasOverlay.appendChild(span);
+      textLayer.appendChild(span);
     }
 
     function makeDraggable(el) {
-      el.style.pointerEvents = 'auto';
-      el.onmousedown = function (e) {
-        const shiftX = e.clientX - el.getBoundingClientRect().left;
-        const shiftY = e.clientY - el.getBoundingClientRect().top;
+      let isDragging = false;
+      let offsetX, offsetY;
 
-        function moveAt(pageX, pageY) {
-          el.style.left = pageX - canvasOverlay.offsetLeft - shiftX + 'px';
-          el.style.top = pageY - canvasOverlay.offsetTop - shiftY + 'px';
+      el.style.pointerEvents = "auto";
+
+      el.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        el.style.zIndex = 10;
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (isDragging) {
+          const rect = textLayer.getBoundingClientRect();
+          el.style.left = `${e.clientX - rect.left - offsetX}px`;
+          el.style.top = `${e.clientY - rect.top - offsetY}px`;
+          el.style.transform = 'translate(0, 0)';
         }
+      });
 
-        function onMouseMove(e) {
-          moveAt(e.pageX, e.pageY);
-        }
-
-        document.addEventListener('mousemove', onMouseMove);
-        el.onmouseup = function () {
-          document.removeEventListener('mousemove', onMouseMove);
-          el.onmouseup = null;
-        };
-      };
-      el.ondragstart = () => false;
+      document.addEventListener('mouseup', function () {
+        isDragging = false;
+        el.style.zIndex = 3;
+      });
     }
 
-    // چرخ رنگ برای لباس
+    // چرخ رنگ لباس
     const colorWheel = document.getElementById("colorWheel");
-    const ctx = colorWheel.getContext("2d");
+    const ctx = colorWheel.getContext('2d');
 
     function drawColorWheel() {
       const radius = colorWheel.width / 2;
@@ -142,36 +183,19 @@
       gradient.addColorStop(0.83, 'magenta');
       gradient.addColorStop(1, 'red');
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, colorWheel.width, colorWheel.height);
+      ctx.beginPath();
+      ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+      ctx.fill();
     }
 
     drawColorWheel();
-
-    colorWheel.addEventListener("click", async (event) => {
-      const rect = colorWheel.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      const radius = colorWheel.width / 2;
-      const dx = x - radius;
-      const dy = y - radius;
-      const angle = Math.atan2(dy, dx);
-      const hue = (angle * 180 / Math.PI + 360) % 360;
-      const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
-
-      await viewer.updateComplete;
-      const material = viewer.model.materials[0];
-      material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);
-
-      colorWheel.classList.add("clicked");
-      setTimeout(() => colorWheel.classList.remove("clicked"), 300);
-    });
 
     function hslToRgb(h, s, l) {
       let r, g, b;
       if (s == 0) {
         r = g = b = l;
       } else {
-        const hue2rgb = (p, q, t) => {
+        const hue2rgb = function (p, q, t) {
           if (t < 0) t += 1;
           if (t > 1) t -= 1;
           if (t < 1 / 6) return p + (q - p) * 6 * t;
@@ -187,6 +211,23 @@
       }
       return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
     }
+
+    colorWheel.addEventListener("click", async function (e) {
+      const rect = colorWheel.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const radius = colorWheel.width / 2;
+      const dx = x - radius;
+      const dy = y - radius;
+      const angle = Math.atan2(dy, dx);
+      const hue = (angle * 180 / Math.PI + 360) % 360;
+      const [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
+
+      await modelViewer.updateComplete;
+      const material = modelViewer.model.materials[0];
+      material.pbrMetallicRoughness.setBaseColorFactor([r / 255, g / 255, b / 255, 1]);
+    });
   </script>
+
 </body>
 </html>
