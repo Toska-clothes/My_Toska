@@ -219,10 +219,9 @@
       const texture = new THREE.CanvasTexture(canvas);
       const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
 
-      const geometry = new THREE.PlaneGeometry(2, 1);
-      const mesh = new THREE.Mesh(geometry, material);
-      mesh.position.set(0, 0, 0); // موقعیت متن
-      modelViewer.model.add(mesh);
+      // Assuming the model is a mesh, applying the texture to the model
+      modelViewer.model.materials[0].map = texture;
+      modelViewer.model.materials[0].needsUpdate = true;
     }
 
     // Update text style
