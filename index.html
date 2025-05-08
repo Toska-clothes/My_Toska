@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +9,8 @@
         body {
             font-family: 'Vazirmatn', sans-serif;
             text-align: center;
-            background-color: #f3f1e0; /* رنگ نسکافه‌ای روشن */
-            color: #3e2723; /* رنگ قهوه‌ای تیره */
+            background-color: #f3f1e0;
+            color: #3e2723;
         }
         h1 {
             font-size: 2.5rem;
@@ -19,14 +20,14 @@
         p {
             font-size: 1.5rem;
             margin-top: 10px;
-            color: #5d4037; /* رنگ قهوه‌ای ملایم تر */
+            color: #5d4037;
         }
         .btn-container {
             margin-top: 50px;
         }
         .btn {
             padding: 15px 40px;
-            background-color: #f5a623; /* رنگ دکمه قهوه‌ای مایل به زرد */
+            background-color: #f5a623;
             color: white;
             border: none;
             border-radius: 10px;
@@ -36,18 +37,35 @@
             transition: background-color 0.3s;
         }
         .btn:hover {
-            background-color: #ff8c00; /* تغییر رنگ دکمه هنگام هاور */
+            background-color: #ff8c00;
+        }
+        #women-options {
+            display: none;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
     <h1>سلام سلام! خوش اومدین</h1>
-    <p>وقتشه لباس مورد علاقتون رو خودتون طراحی کنید!</p><div class="btn-container">
-    <button class="btn" onclick="window.location.href='women.html'">لباس زنانه</button>
-    <button class="btn" onclick="window.location.href='men.html'">لباس مردانه</button>
-    <button class="btn" onclick="window.location.href='kids.html'">لباس بچگانه</button>
-    <button class="btn" onclick="window.location.href='animals.html'">لباس حیوانات</button>
-</div>
+    <p>وقتشه لباس مورد علاقتون رو خودتون طراحی کنید!</p>
+    
+    <div class="btn-container">
+        <button class="btn" onclick="showWomenOptions()">لباس زنانه</button>
+        <button class="btn" onclick="alert('صفحه لباس مردانه در حال ساخت است')">لباس مردانه</button>
+        <button class="btn" onclick="alert('صفحه لباس بچگانه در حال ساخت است')">لباس بچگانه</button>
+        <button class="btn" onclick="alert('صفحه لباس حیوانات در حال ساخت است')">لباس حیوانات</button>
+    </div>
 
+    <div id="women-options" class="btn-container">
+        <button class="btn" onclick="window.location.href='tshirt-women.html'">تیشرت</button>
+        <button class="btn" onclick="window.location.href='hoodie-women.html'">هودی</button>
+        <button class="btn" onclick="window.location.href='pants-women.html'">شلوار</button>
+    </div>
+
+    <script>
+        function showWomenOptions() {
+            document.getElementById('women-options').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
