@@ -105,6 +105,8 @@
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
 
+    let modelIsReady = false;
+
     const colorMap = {
       red: "#ff0000",
       blue: "#0000ff",
@@ -139,19 +141,27 @@
       });
     });
 
+    // وقتی مدل لود شد، فلگ فعال می‌شود
+    modelViewer.addEventListener('load', () => {
+      modelIsReady = true;
+    });
+
     applyTextBtn.addEventListener("click", async () => {
-      const text = textInput.value.trim();
-      if (!text) return;
-
-      await modelViewer.updateComplete;
-
-      const { THREE, scene } = modelViewer;
-      if (!THREE || !scene) {
+      if (!modelIsReady) {
         alert("مدل هنوز آماده نشده است. لطفاً کمی صبر کنید.");
         return;
       }
 
-      // حذف متن قبلی اگر وجود داشته باشد
+      const text = textInput.value.trim();
+      if (!text) return;
+
+      const { THREE, scene } = modelViewer;
+      if (!THREE || !scene) {
+        alert("مشکل در دسترسی به صحنه یا Three.js.");
+        return;
+      }
+
+      // حذف متن قبلی
       const existingText = scene.getObjectByName("customText");
       if (existingText) scene.remove(existingText);
 
