@@ -94,6 +94,14 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById('modelViewer').appendChild(renderer.domElement);
 
+    // نورپردازی
+    const ambientLight = new THREE.AmbientLight(0x404040); // نور محیط
+    scene.add(ambientLight);
+    
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 5, 5).normalize();
+    scene.add(directionalLight);
+
     // بارگذاری مدل سه‌بعدی
     const loader = new THREE.GLTFLoader();
     let model;
@@ -104,26 +112,24 @@
       model.scale.set(2, 2, 2); // اندازه مدل
       model.position.y = -1;
 
-      // نورپردازی
-      const light = new THREE.AmbientLight(0x404040); // نور محیط
-      scene.add(light);
-      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-      directionalLight.position.set(5, 5, 5);
-      scene.add(directionalLight);
+      camera.position.z = 5; // تنظیم موقعیت دوربین
 
-      camera.position.z = 5;
+      // تنظیمات چرخش مدل
+      animate();
+    }, undefined, function(error) {
+      console.error(error);
     });
 
     // چرخش مدل
-    let rotationSpeed = 0.01;
     function animate() {
       requestAnimationFrame(animate);
+
       if (model) {
-        model.rotation.y += rotationSpeed;
+        model.rotation.y += 0.01; // چرخش مدل
       }
+
       renderer.render(scene, camera);
     }
-    animate();
 
     // تغییر رنگ مدل
     const colorMap = {
@@ -161,7 +167,10 @@
       const text = textInput.value.trim();
       if (text && model) {
         const textGeometry = new THREE.TextGeometry(text, {
-          font: new THREE.FontLoader().parse(/* JSON font */),
+          font: new THREE.FontLoader().parse({
+            "glyphs": { /* داده‌های فونت */ },
+            "familyName": "MyFont"
+          }),
           size: 0.5,
           height: 0.1
         });
