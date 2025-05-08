@@ -2,16 +2,16 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>سفارشی‌سازی هودی</title>
+  <title>مدل سه‌بعدی هودی</title>
   <style>
-    body { margin: 0; font-family: sans-serif; direction: rtl; overflow: hidden; }
+    body { margin: 0; overflow: hidden; direction: rtl; font-family: sans-serif; }
     #ui {
       position: absolute;
       top: 10px;
       right: 10px;
       background: rgba(255, 255, 255, 0.95);
-      padding: 10px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 10px;
       z-index: 10;
     }
     input, button { margin-top: 5px; width: 160px; padding: 5px; }
@@ -41,7 +41,7 @@
     <label>متن دلخواه:</label><br>
     <input type="text" id="textInput" placeholder="مثلاً توسکا" />
     <button id="applyText">ثبت متن</button><br>
-    <small>روی لباس کلیک کنید تا محل درج متن انتخاب شود.</small>
+    <small>روی لباس کلیک کنید تا متن روی آن درج شود.</small>
   </div>
   <canvas id="canvas"></canvas>
 
@@ -53,19 +53,27 @@
     let camera, scene, renderer, model, intersectPoint = null;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    const canvas = document.getElementById("canvas");
 
+    const canvas = document.getElementById("canvas");
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf5f5f5);
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 1.5, 3);
-    const controls = new OrbitControls(camera, renderer.domElement);
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
-    scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 1.4, 0);
+    controls.update();
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.4);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    scene.add(dirLight);
 
     const loader = new GLTFLoader();
     loader.load(
@@ -79,7 +87,7 @@
       },
       undefined,
       function (error) {
-        console.error('مدل بارگذاری نشد:', error);
+        console.error('مدل لود نشد:', error);
       }
     );
 
