@@ -1,12 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>هودی زنانه | نمایش سه‌بعدی</title>
+
+  <!-- Model Viewer -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+  <!-- Three.js & FontLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/loaders/FontLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.156.1/examples/js/geometries/TextGeometry.js"></script>
+
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
@@ -106,15 +115,6 @@
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
 
-    let modelIsReady = false;
-
-    window.addEventListener("DOMContentLoaded", () => {
-      modelViewer.addEventListener("load", () => {
-        modelIsReady = true;
-        console.log("مدل بارگذاری شد.");
-      });
-    });
-
     const colorMap = {
       red: "#ff0000",
       blue: "#0000ff",
@@ -150,18 +150,24 @@
     });
 
     applyTextBtn.addEventListener("click", async () => {
-      if (!modelIsReady || !modelViewer.scene || !modelViewer.THREE) {
-        alert("مدل هنوز آماده نشده است. لطفاً کمی صبر کنید.");
+      const THREE = window.THREE;
+      if (!modelViewer.model || !THREE) {
+        alert("مدل هنوز آماده نشده است یا Three.js در دسترس نیست.");
+        return;
+      }
+
+      const scene = modelViewer.scene;
+      if (!scene) {
+        alert("مشکل در دسترسی به صحنه.");
         return;
       }
 
       const text = textInput.value.trim();
       if (!text) return;
 
-      const { THREE, scene } = modelViewer;
-
-      const existingText = scene.getObjectByName("customText");
-      if (existingText) scene.remove(existingText);
+      // حذف متن قبلی
+      const old = scene.getObjectByName("customText");
+      if (old) scene.remove(old);
 
       const loader = new THREE.FontLoader();
       loader.load('helvetiker_regular.typeface.json', function (font) {
