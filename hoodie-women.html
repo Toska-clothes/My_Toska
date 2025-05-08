@@ -2,98 +2,8 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>هودی زنانه | نمایش سه‌بعدی</title>
-  <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
-    import { FontLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/FontLoader.js';
-    import { TextGeometry } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/TextGeometry.js';
-
-    let scene, camera, renderer, hoodie, textMesh;
-    const colorMap = {
-      red: 0xff0000,
-      blue: 0x0000ff,
-      black: 0x000000,
-      white: 0xffffff,
-    };
-
-    init();
-    animate();
-
-    function init() {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color('#f3f1e0');
-
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(0, 1.5, 3);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight * 0.75);
-      document.getElementById("modelArea").appendChild(renderer.domElement);
-
-      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-      hemiLight.position.set(0, 20, 0);
-      scene.add(hemiLight);
-
-      const loader = new GLTFLoader();
-      loader.load('https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/hoodie.glb', (gltf) => {
-        hoodie = gltf.scene;
-        hoodie.traverse((node) => {
-          if (node.isMesh) node.material.color.setHex(0x000000);
-        });
-        scene.add(hoodie);
-      }, undefined, (err) => {
-        alert('مشکل در بارگذاری مدل');
-        console.error(err);
-      });
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
-      document.getElementById("applyText").addEventListener("click", () => {
-        const input = document.getElementById("textInput").value.trim();
-        if (!hoodie) {
-          alert("مدل هنوز آماده نشده است لطفا کمی صبر کنید");
-          return;
-        }
-        if (textMesh) hoodie.remove(textMesh);
-        const fontLoader = new FontLoader();
-        fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', (font) => {
-          const textGeo = new TextGeometry(input, {
-            font: font,
-            size: 0.15,
-            height: 0.02,
-          });
-          const material = new THREE.MeshStandardMaterial({ color: 0x000000 });
-          textMesh = new THREE.Mesh(textGeo, material);
-          textGeo.center();
-          textMesh.position.set(0, 1.2, 0.45);
-          hoodie.add(textMesh);
-        });
-      });
-
-      document.querySelectorAll('.color-circle').forEach(circle => {
-        circle.addEventListener('click', () => {
-          document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
-          circle.classList.add('selected');
-          const selectedColor = circle.getAttribute('data-color');
-          if (hoodie) {
-            hoodie.traverse((node) => {
-              if (node.isMesh) node.material.color.setHex(colorMap[selectedColor]);
-            });
-          }
-        });
-      });
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-      if (hoodie) hoodie.rotation.y += 0.005;
-      renderer.render(scene, camera);
-    }
-  </script>
-
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -101,13 +11,25 @@
       background-color: #f3f1e0;
       color: #3e2723;
       text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    h1 { font-size: 2rem; padding-top: 10px; }
-    #modelArea { height: 500px; }
-    .options-container {
       padding: 20px;
+    }
+    h1 { font-size: 2.2rem; }
+    .model-container {
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+    #hoodieImage {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transform-origin: center center;
+      transition: transform 0.5s;
+    }
+    .options-container {
+      margin-top: 30px;
     }
     .label {
       display: block;
@@ -146,13 +68,22 @@
       color: #fff;
       cursor: pointer;
     }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
   <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
-
-  <div id="modelArea"></div>
+  
+  <div class="model-container">
+    <img id="hoodieImage" src="hoodie_image.jpg" alt="هودی سه‌بعدی" />
+    <canvas id="canvas" width="600" height="500"></canvas>
+  </div>
 
   <div class="options-container">
     <label class="label">رنگ:</label>
@@ -167,5 +98,70 @@
     <input type="text" id="textInput" placeholder="مثلاً توسکا">
     <button id="applyText">اعمال متن</button>
   </div>
+
+  <script>
+    const hoodieImage = document.getElementById("hoodieImage");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const colorCircles = document.querySelectorAll(".color-circle");
+    const textInput = document.getElementById("textInput");
+    const applyTextBtn = document.getElementById("applyText");
+
+    let currentText = '';
+    let currentColor = 'black';
+
+    // Function to change the color of the hoodie image
+    function changeColor(color) {
+      hoodieImage.style.filter = `hue-rotate(${getHueFromColor(color)}deg)`;
+    }
+
+    // Get the hue value from the selected color
+    function getHueFromColor(color) {
+      const colorMap = {
+        red: 0,
+        blue: 240,
+        black: 0,
+        white: 0
+      };
+      return colorMap[color] || 0;
+    }
+
+    // Function to draw the text on the canvas
+    function drawText() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous text
+      ctx.font = '30px Vazirmatn, sans-serif';
+      ctx.fillStyle = currentColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(currentText, canvas.width / 2, canvas.height / 2);
+    }
+
+    // Event listeners for color selection
+    colorCircles.forEach(circle => {
+      circle.addEventListener("click", () => {
+        colorCircles.forEach(c => c.classList.remove("selected"));
+        circle.classList.add("selected");
+        currentColor = circle.getAttribute("data-color");
+        changeColor(currentColor);
+      });
+    });
+
+    // Event listener for applying text
+    applyTextBtn.addEventListener("click", () => {
+      currentText = textInput.value.trim();
+      if (currentText) {
+        drawText();
+      } else {
+        alert('لطفاً متن وارد کنید.');
+      }
+    });
+
+    // Function to rotate the hoodie image (simulate 3D rotation)
+    let rotationAngle = 0;
+    setInterval(() => {
+      rotationAngle += 2;
+      hoodieImage.style.transform = `rotate(${rotationAngle}deg)`;
+    }, 100);
+  </script>
 </body>
 </html>
