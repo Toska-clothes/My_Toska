@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fa">
 <head>
@@ -107,6 +108,13 @@
 
     let modelIsReady = false;
 
+    window.addEventListener("DOMContentLoaded", () => {
+      modelViewer.addEventListener("load", () => {
+        modelIsReady = true;
+        console.log("مدل بارگذاری شد.");
+      });
+    });
+
     const colorMap = {
       red: "#ff0000",
       blue: "#0000ff",
@@ -141,13 +149,8 @@
       });
     });
 
-    // وقتی مدل لود شد، فلگ فعال می‌شود
-    modelViewer.addEventListener('load', () => {
-      modelIsReady = true;
-    });
-
     applyTextBtn.addEventListener("click", async () => {
-      if (!modelIsReady) {
+      if (!modelIsReady || !modelViewer.scene || !modelViewer.THREE) {
         alert("مدل هنوز آماده نشده است. لطفاً کمی صبر کنید.");
         return;
       }
@@ -156,12 +159,7 @@
       if (!text) return;
 
       const { THREE, scene } = modelViewer;
-      if (!THREE || !scene) {
-        alert("مشکل در دسترسی به صحنه یا Three.js.");
-        return;
-      }
 
-      // حذف متن قبلی
       const existingText = scene.getObjectByName("customText");
       if (existingText) scene.remove(existingText);
 
