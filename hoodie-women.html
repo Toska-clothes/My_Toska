@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8">
   <title>سفارشی‌سازی هودی</title>
@@ -8,16 +9,12 @@
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       padding: 10px;
-      border-radius: 10px;
+      border-radius: 8px;
       z-index: 10;
     }
-    input, button {
-      padding: 5px;
-      margin-top: 5px;
-      width: 150px;
-    }
+    input, button { margin-top: 5px; width: 160px; padding: 5px; }
     .color-circle {
       width: 24px;
       height: 24px;
@@ -44,9 +41,11 @@
     <label>متن دلخواه:</label><br>
     <input type="text" id="textInput" placeholder="مثلاً توسکا" />
     <button id="applyText">ثبت متن</button><br>
-    <small>روی لباس کلیک کنید تا محل متن انتخاب شود.</small>
+    <small>روی لباس کلیک کنید تا محل درج متن انتخاب شود.</small>
   </div>
-  <canvas id="canvas"></canvas>  <script type="module">
+  <canvas id="canvas"></canvas>
+
+  <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
     import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
     import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js';
@@ -54,31 +53,33 @@
     let camera, scene, renderer, model, intersectPoint = null;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-
     const canvas = document.getElementById("canvas");
+
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
+    scene.background = new THREE.Color(0xf5f5f5);
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
     camera.position.set(0, 1.5, 3);
     const controls = new OrbitControls(camera, renderer.domElement);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-    scene.add(light);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.5));
+    scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
 
     const loader = new GLTFLoader();
     loader.load(
-      'https://toska-clothes.github.io/My_Toska/hoodie.glb',
+      'https://raw.githubusercontent.com/Toska-clothes/My_Toska/main/hoodie.glb',
       function (gltf) {
         model = gltf.scene;
+        model.scale.set(1, 1, 1);
+        model.position.set(0, 0, 0);
         scene.add(model);
         animate();
       },
       undefined,
       function (error) {
-        console.error('Error loading model:', error);
+        console.error('مدل بارگذاری نشد:', error);
       }
     );
 
@@ -147,5 +148,6 @@
         }
       });
     });
-  </script></body>
+  </script>
+</body>
 </html>
