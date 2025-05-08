@@ -2,18 +2,46 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>هودی سه‌بعدی با متن دلخواه</title>
+  <title>مدل سه‌بعدی هودی با متن و رنگ</title>
   <style>
     body { margin: 0; overflow: hidden; font-family: sans-serif; direction: rtl; }
     #gui {
       position: absolute; top: 10px; right: 10px;
-      background: rgba(255,255,255,0.9); padding: 10px; border-radius: 10px;
+      background: rgba(255,255,255,0.95); padding: 10px; border-radius: 10px; z-index: 10;
     }
     label { display: block; margin-top: 10px; }
+    .color-picker {
+      display: flex; gap: 6px; margin-top: 5px;
+    }
+    .color-circle {
+      width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid #fff;
+      box-shadow: 0 0 2px rgba(0,0,0,0.3);
+    }
+    .color-circle.selected { border: 2px solid #000; }
+    #errorMsg {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fdd;
+      padding: 20px;
+      border: 1px solid red;
+      font-weight: bold;
+      display: none;
+      z-index: 20;
+    }
   </style>
 </head>
 <body>
   <div id="gui">
+    <label>رنگ:</label>
+    <div class="color-picker">
+      <div class="color-circle" data-color="#ff0000" style="background-color: red;"></div>
+      <div class="color-circle" data-color="#0000ff" style="background-color: blue;"></div>
+      <div class="color-circle" data-color="#000000" style="background-color: black;"></div>
+      <div class="color-circle" data-color="#ffffff" style="background-color: white; border: 1px solid #aaa;"></div>
+    </div>
+
     <label>متن دلخواه:</label>
     <input type="text" id="textInput" placeholder="مثلاً توسکا">
 
@@ -22,14 +50,13 @@
       <option value="Arial">Arial</option>
       <option value="Tahoma">Tahoma</option>
       <option value="Courier New">Courier New</option>
-      <option value="Vazir">Vazir</option>
     </select>
 
     <label>اندازه متن:</label>
     <input type="range" id="textSize" min="10" max="100" value="40">
-
-    <button id="applyText">ثبت متن</button>
   </div>
+
+  <div id="errorMsg">مدل هودی پیدا نشد. لطفاً بررسی کنید فایل "hoodie.glb" در مسیر درست قرار دارد.</div>
 
   <script type="module">
     import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js';
@@ -54,7 +81,15 @@
     const loader = new GLTFLoader();
     loader.load('hoodie.glb', function(gltf) {
       hoodie = gltf.scene;
+      hoodie.traverse((child) => {
+        if (child.isMesh) {
+          child.material = child.material.clone(); // قابل ویرایشش کنیم
+        }
+      });
       scene.add(hoodie);
+    }, undefined, function(error) {
+      document.getElementById('errorMsg').style.display = 'block';
+      console.error('خطا در بارگذاری مدل:', error);
     });
 
     function createTextSprite(message, font, fontSize) {
@@ -75,22 +110,9 @@
       return sprite;
     }
 
-    document.getElementById('applyText').addEventListener('click', () => {
-      const text = document.getElementById('textInput').value;
-      const font = document.getElementById('fontSelect').value;
-      const size = document.getElementById('textSize').value;
-
-      if (!text) return;
-
-      const sprite = createTextSprite(text, font, size);
-      sprite.position.set(0, 1.4, 0); // موقعیت پیش‌فرض روی سینه
-      hoodie.add(sprite);
-    });
-
-    // کلیک روی مدل برای تعیین موقعیت متن
+    // کلیک برای جای‌گذاری متن روی مدل
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-
     renderer.domElement.addEventListener('click', (event) => {
       if (!hoodie) return;
 
@@ -111,6 +133,24 @@
           hoodie.add(sprite);
         }
       }
+    });
+
+    // تغییر رنگ
+    const colorCircles = document.querySelectorAll('.color-circle');
+    colorCircles.forEach(circle => {
+      circle.addEventListener('click', () => {
+        const hexColor = circle.getAttribute('data-color');
+        colorCircles.forEach(c => c.classList.remove('selected'));
+        circle.classList.add('selected');
+
+        if (hoodie) {
+          hoodie.traverse((child) => {
+            if (child.isMesh && child.material && child.material.color) {
+              child.material.color.set(hexColor);
+            }
+          });
+        }
+      });
     });
 
     function animate() {
