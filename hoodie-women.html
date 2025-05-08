@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>هودی زنانه | نمایش سه‌بعدی</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/loaders/GLTFLoader.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     body {
@@ -19,14 +21,6 @@
       max-width: 600px;
       height: 500px;
       position: relative;
-      overflow: hidden;
-    }
-    #hoodieImage {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      transform-origin: center center;
-      transition: transform 0.5s;
     }
     .options-container {
       margin-top: 30px;
@@ -68,12 +62,6 @@
       color: #fff;
       cursor: pointer;
     }
-    canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -81,8 +69,7 @@
   <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
   
   <div class="model-container">
-    <img id="hoodieImage" src="hoodie_image.jpg" alt="هودی سه‌بعدی" />
-    <canvas id="canvas" width="600" height="500"></canvas>
+    <div id="modelViewer"></div>
   </div>
 
   <div class="options-container">
@@ -100,68 +87,93 @@
   </div>
 
   <script>
-    const hoodieImage = document.getElementById("hoodieImage");
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const colorCircles = document.querySelectorAll(".color-circle");
-    const textInput = document.getElementById("textInput");
-    const applyTextBtn = document.getElementById("applyText");
+    // تنظیمات اصلی Three.js
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById('modelViewer').appendChild(renderer.domElement);
 
-    let currentText = '';
-    let currentColor = 'black';
+    // بارگذاری مدل سه‌بعدی
+    const loader = new THREE.GLTFLoader();
+    let model;
 
-    // Function to change the color of the hoodie image
-    function changeColor(color) {
-      hoodieImage.style.filter = `hue-rotate(${getHueFromColor(color)}deg)`;
+    loader.load('hoodie.glb', function(gltf) {
+      model = gltf.scene;
+      scene.add(model);
+      model.scale.set(2, 2, 2); // اندازه مدل
+      model.position.y = -1;
+
+      // نورپردازی
+      const light = new THREE.AmbientLight(0x404040); // نور محیط
+      scene.add(light);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(5, 5, 5);
+      scene.add(directionalLight);
+
+      camera.position.z = 5;
+    });
+
+    // چرخش مدل
+    let rotationSpeed = 0.01;
+    function animate() {
+      requestAnimationFrame(animate);
+      if (model) {
+        model.rotation.y += rotationSpeed;
+      }
+      renderer.render(scene, camera);
     }
+    animate();
 
-    // Get the hue value from the selected color
-    function getHueFromColor(color) {
-      const colorMap = {
-        red: 0,
-        blue: 240,
-        black: 0,
-        white: 0
-      };
-      return colorMap[color] || 0;
-    }
+    // تغییر رنگ مدل
+    const colorMap = {
+      red: new THREE.Color(0xff0000),
+      blue: new THREE.Color(0x0000ff),
+      black: new THREE.Color(0x000000),
+      white: new THREE.Color(0xffffff)
+    };
 
-    // Function to draw the text on the canvas
-    function drawText() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous text
-      ctx.font = '30px Vazirmatn, sans-serif';
-      ctx.fillStyle = currentColor;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(currentText, canvas.width / 2, canvas.height / 2);
-    }
-
-    // Event listeners for color selection
+    const colorCircles = document.querySelectorAll('.color-circle');
     colorCircles.forEach(circle => {
-      circle.addEventListener("click", () => {
-        colorCircles.forEach(c => c.classList.remove("selected"));
-        circle.classList.add("selected");
-        currentColor = circle.getAttribute("data-color");
-        changeColor(currentColor);
+      circle.addEventListener('click', () => {
+        colorCircles.forEach(c => c.classList.remove('selected'));
+        circle.classList.add('selected');
+        const colorName = circle.getAttribute('data-color');
+        changeColor(colorName);
       });
     });
 
-    // Event listener for applying text
-    applyTextBtn.addEventListener("click", () => {
-      currentText = textInput.value.trim();
-      if (currentText) {
-        drawText();
+    function changeColor(colorName) {
+      if (model) {
+        model.traverse(function(child) {
+          if (child.isMesh) {
+            child.material.color.set(colorMap[colorName]);
+          }
+        });
+      }
+    }
+
+    // اعمال متن
+    const textInput = document.getElementById('textInput');
+    const applyTextBtn = document.getElementById('applyText');
+
+    applyTextBtn.addEventListener('click', () => {
+      const text = textInput.value.trim();
+      if (text && model) {
+        const textGeometry = new THREE.TextGeometry(text, {
+          font: new THREE.FontLoader().parse(/* JSON font */),
+          size: 0.5,
+          height: 0.1
+        });
+
+        const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        textMesh.position.set(0, 1, 0); // موقعیت متن
+        model.add(textMesh); // افزودن متن به مدل
       } else {
         alert('لطفاً متن وارد کنید.');
       }
     });
-
-    // Function to rotate the hoodie image (simulate 3D rotation)
-    let rotationAngle = 0;
-    setInterval(() => {
-      rotationAngle += 2;
-      hoodieImage.style.transform = `rotate(${rotationAngle}deg)`;
-    }, 100);
   </script>
 </body>
 </html>
