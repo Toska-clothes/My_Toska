@@ -3,172 +3,129 @@
 <head>
   <meta charset="UTF-8" />
   <title>سفارشی‌سازی هودی</title>
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    body { margin: 0; overflow: hidden; font-family: sans-serif; direction: rtl; }
+    #ui {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255,255,255,0.9);
+      padding: 10px;
+      border-radius: 10px;
+      z-index: 10;
     }
-
-    .model-container {
-      width: 100%;
-      height: 500px;
-    }
-
-    model-viewer {
-      width: 100%;
-      height: 100%;
-    }
-
-    .options-container {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
-    }
-
-    .color-picker {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .color-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid transparent;
-    }
-
-    .color-circle.selected {
-      border-color: #333;
-    }
-
     input, button {
-      padding: 5px 10px;
-      margin: 5px;
+      padding: 5px;
+      margin-top: 5px;
+      width: 150px;
     }
   </style>
 </head>
 <body>
 
-<!-- نمایش مدل سه‌بعدی -->
-<div class="model-container">
-  <model-viewer id="hoodieModel"
-                src="https://toska-clothes.github.io/My_Toska/hoodie.glb"
-                alt="هودی سه‌بعدی"
-                auto-rotate
-                camera-controls
-                exposure="1"
-                shadow-intensity="1"
-                interaction-prompt="none">
-  </model-viewer>
+<div id="ui">
+  <label>متن دلخواه:</label><br />
+  <input type="text" id="textInput" placeholder="مثلاً توسکا" /><br />
+  <button id="applyText">ثبت متن</button><br />
+  <small>روی لباس کلیک کنید تا محل متن را انتخاب کنید.</small>
 </div>
 
-<!-- گزینه‌های کاربر -->
-<div class="options-container">
-  <label class="label">رنگ:</label>
-  <div class="color-picker">
-    <div class="color-circle" data-color="red" style="background-color: red;"></div>
-    <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
-    <div class="color-circle" data-color="black" style="background-color: black;"></div>
-    <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
-  </div>
+<canvas id="canvas"></canvas>
 
-  <label class="label">متن دلخواه:</label>
-  <input type="text" id="textInput" placeholder="مثلاً توسکا">
-  <button id="applyText">اعمال متن</button>
-</div>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js';
+  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/loaders/GLTFLoader.js';
+  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js';
 
-<!-- اسکریپت مدیریت -->
-<script>
-  const modelViewer = document.getElementById("hoodieModel");
-  const colorCircles = document.querySelectorAll(".color-circle");
-  const textInput = document.getElementById("textInput");
-  const applyTextBtn = document.getElementById("applyText");
+  let camera, scene, renderer, controls, model, intersectPoint = null;
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
 
-  const colorMap = {
-    red: "#ff0000",
-    blue: "#0000ff",
-    black: "#000000",
-    white: "#ffffff"
-  };
+  const canvas = document.getElementById("canvas");
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
 
-  function hexToRgba(hex) {
-    const bigint = parseInt(hex.slice(1), 16);
-    const r = ((bigint >> 16) & 255) / 255;
-    const g = ((bigint >> 8) & 255) / 255;
-    const b = (bigint & 255) / 255;
-    return [r, g, b, 1];
-  }
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf0f0f0);
 
-  async function changeColor(colorName) {
-    const hex = colorMap[colorName];
-    const rgba = hexToRgba(hex);
-    await modelViewer.updateComplete;
-    const material = modelViewer.model?.materials[0];
-    if (material) {
-      material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 1.5, 3);
+  controls = new OrbitControls(camera, renderer.domElement);
+
+  const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
+  scene.add(light);
+
+  const loader = new GLTFLoader();
+  loader.load(
+    'https://toska-clothes.github.io/My_Toska/hoodie.glb',
+    function (gltf) {
+      model = gltf.scene;
+      scene.add(model);
+      animate();
+    },
+    undefined,
+    function (error) {
+      console.error('Error loading model:', error);
     }
+  );
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
   }
 
-  async function applyTextToModel() {
-    await modelViewer.updateComplete;
-    const material = modelViewer.model?.materials[0];
-    if (!material) {
-      alert("مدل هنوز بارگذاری نشده است.");
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // گرفتن مختصات کلیک روی مدل
+  canvas.addEventListener('pointerdown', (event) => {
+    const bounds = canvas.getBoundingClientRect();
+    pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
+    pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
+
+    raycaster.setFromCamera(pointer, camera);
+    if (model) {
+      const intersects = raycaster.intersectObject(model, true);
+      if (intersects.length > 0) {
+        intersectPoint = intersects[0].point;
+        alert("محل متن انتخاب شد. حالا متن رو ثبت کنید.");
+      }
+    }
+  });
+
+  // درج متن به صورت تصویر روی مدل
+  document.getElementById("applyText").addEventListener("click", () => {
+    if (!model || !intersectPoint) {
+      alert("ابتدا روی لباس کلیک کنید تا محل درج متن انتخاب شود.");
       return;
     }
 
-    // ساخت بافت جدید با متن
-    const canvas = document.createElement("canvas");
-    canvas.width = 1024;
-    canvas.height = 1024;
-    const ctx = canvas.getContext("2d");
+    const text = document.getElementById("textInput").value || "توسکا";
 
-    // زمینه سفید
+    const canvasTex = document.createElement("canvas");
+    canvasTex.width = 512;
+    canvasTex.height = 256;
+    const ctx = canvasTex.getContext("2d");
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // درج متن
-    const text = textInput.value || "لوگو";
+    ctx.fillRect(0, 0, canvasTex.width, canvasTex.height);
     ctx.fillStyle = "#000000";
-    ctx.font = "bold 80px Arial";
+    ctx.font = "bold 40px sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    ctx.fillText(text, canvasTex.width / 2, canvasTex.height / 2 + 15);
 
-    // ساخت تکسچر و اعمال آن
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.flipY = false;
+    const texture = new THREE.CanvasTexture(canvasTex);
+    texture.needsUpdate = true;
 
-    material.pbrMetallicRoughness.setBaseColorTexture(texture);
-  }
-
-  // انتخاب رنگ
-  colorCircles.forEach(circle => {
-    circle.addEventListener("click", () => {
-      colorCircles.forEach(c => c.classList.remove("selected"));
-      circle.classList.add("selected");
-      const selectedColor = circle.getAttribute("data-color");
-      changeColor(selectedColor);
-    });
-  });
-
-  // اعمال متن
-  applyTextBtn.addEventListener("click", () => {
-    applyTextToModel();
+    const planeGeometry = new THREE.PlaneGeometry(0.6, 0.3);
+    const planeMaterial = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+    const textPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+    textPlane.position.copy(intersectPoint);
+    textPlane.lookAt(camera.position);  // متن رو به دوربین بچرخون
+    scene.add(textPlane);
   });
 </script>
-
 </body>
 </html>
