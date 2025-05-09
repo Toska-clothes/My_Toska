@@ -72,9 +72,13 @@
         cursor: pointer;
       }
       .text-overlay {
-        width: 128px;
-        height: 64px;
-        background: transparent;
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1;
+        width: 200px;
+        height: 100px;
       }
       .text-overlay canvas {
         width: 100%;
@@ -98,7 +102,8 @@
         shadow-intensity="1"
         interaction-prompt="none"
       >
-        <div slot="hotspot-1" class="text-overlay" data-position="0 1.3 0.3" data-normal="0 0 -1">
+        <!-- متن در لایه جلویی قرار می‌گیرد -->
+        <div class="text-overlay">
           <canvas id="textCanvas" width="256" height="128"></canvas>
         </div>
       </model-viewer>
@@ -171,21 +176,26 @@
         return canvas;
       }
 
-      applyTextBtn.addEventListener("click", async () => {
+      applyTextBtn.addEventListener("click", () => {
         const text = textInput.value.trim();
         if (!text) return;
 
-        await modelViewer.updateComplete;
+        // رسم متن روی بوم (canvas)
+        const canvas = document.getElementById("textCanvas");
+        const ctx = canvas.getContext("2d");
 
-        const material = modelViewer.model?.materials[1]; // دومین متریال برای چاپ روی جلو
+        // پاک کردن قبلی
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (material) {
-          const canvas = createTextTexture(text);
-          const texture = await modelViewer.createTexture(canvas);
-          material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
-        } else {
-          alert("امکان درج متن روی مدل وجود ندارد. بررسی شود که مدل دارای متریال مناسب باشد.");
-        }
+        // پس‌زمینه سفید
+        ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // نوشتن متن
+        ctx.fillStyle = "#000";
+        ctx.font = "30px Vazirmatn";
+        ctx.textAlign = "center";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2 + 10);
       });
     </script>
   </body>
