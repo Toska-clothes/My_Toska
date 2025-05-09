@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="fa">
+
+<!DOCTYPE html>
+<html lang="fa">
   <head>
     <meta charset="UTF-8" />
     <title>هودی سه‌بعدی با متن دلخواه</title>
@@ -23,101 +25,68 @@
         padding: 5px 10px;
         font-size: 1rem;
       }
+      model-viewer {
+        width: 100%;
+        height: 100vh;
+        background-color: #eee;
+      }
     </style>
   </head>
   <body>
     <div id="overlay">
       <label>متن دلخواه:</label>
       <input type="text" id="textInput" placeholder="مثلاً توسکا" />
+      <button id="applyText">اعمال متن</button>
     </div>
-    <canvas id="canvas"></canvas><script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/loaders/GLTFLoader.js';
-  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/controls/OrbitControls.js';
 
-  let camera, scene, renderer, model, controls;
-  const canvas = document.getElementById('canvas');
+    <!-- استفاده از model-viewer -->
+    <model-viewer
+      id="hoodieModel"
+      src="hoodie.glb"
+      alt="هودی سه‌بعدی"
+      auto-rotate
+      camera-controls
+      ar
+      exposure="1"
+      shadow-intensity="1"
+      interaction-prompt="none">
+    </model-viewer>
 
-  init();
+    <script>
+      const modelViewer = document.getElementById('hoodieModel');
+      const textInput = document.getElementById('textInput');
+      const applyTextBtn = document.getElementById('applyText');
 
-  function init() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.6, 3);
+      applyTextBtn.addEventListener('click', () => {
+        const text = textInput.value;
+        if (!text) return;
 
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+        // ساخت تکسچر با متن
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-    scene.add(light);
+        // زمینه سفید
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    controls = new OrbitControls(camera, renderer.domElement);
+        // نوشتن متن وسط بوم
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 40px Vazirmatn';
+        ctx.textAlign = 'center';
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-    const loader = new GLTFLoader();
-    loader.load('hoodie.glb', (gltf) => {
-      model = gltf.scene;
-      scene.add(model);
-    });
+        const texture = new THREE.CanvasTexture(canvas);
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    canvas.addEventListener('click', onCanvasClick);
-    animate();
-  }
-
-  function onCanvasClick(event) {
-    if (!model) return;
-
-    const text = document.getElementById('textInput').value;
-    if (!text) return;
-
-    const mouse = new THREE.Vector2(
-      (event.clientX / window.innerWidth) * 2 - 1,
-      -(event.clientY / window.innerHeight) * 2 + 1
-    );
-
-    const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObject(model, true);
-    if (intersects.length > 0) {
-      const point = intersects[0].point;
-
-      const sprite = createTextSprite(text);
-      sprite.position.copy(point);
-      scene.add(sprite);
-    }
-  }
-
-  function createTextSprite(message) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 30px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(message, canvas.width / 2, canvas.height / 2);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.SpriteMaterial({ map: texture });
-    const sprite = new THREE.Sprite(material);
-    sprite.scale.set(0.5, 0.25, 1);
-    return sprite;
-  }
-
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-</script>
-
+        // اضافه کردن تکسچر به مدل
+        modelViewer.addEventListener('load', () => {
+          const material = modelViewer.model?.materials[0];
+          if (material) {
+            material.pbrMetallicRoughness.baseColorTexture = texture;
+          }
+        });
+      });
+    </script>
   </body>
 </html>
