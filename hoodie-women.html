@@ -1,70 +1,74 @@
 <script>
-const modelViewer = document.getElementById("hoodieModel");
-const colorCircles = document.querySelectorAll(".color-circle");
-const textInput = document.getElementById("textInput");
-const applyTextBtn = document.getElementById("applyText");
+  const modelViewer = document.getElementById("hoodieModel");
+  const colorCircles = document.querySelectorAll(".color-circle");
+  const textInput = document.getElementById("textInput");
+  const applyTextBtn = document.getElementById("applyText");
 
-const colorMap = {
-  red: "#ff0000",
-  blue: "#0000ff",
-  black: "#000000",
-  white: "#ffffff"
-};
+  const colorMap = {
+    red: "#ff0000",
+    blue: "#0000ff",
+    black: "#000000",
+    white: "#ffffff"
+  };
 
-function hexToRgba(hex) {
-  const bigint = parseInt(hex.slice(1), 16);
-  const r = ((bigint >> 16) & 255) / 255;
-  const g = ((bigint >> 8) & 255) / 255;
-  const b = (bigint & 255) / 255;
-  return [r, g, b, 1];
-}
-
-async function changeColor(colorName) {
-  const hex = colorMap[colorName];
-  const rgba = hexToRgba(hex);
-  await modelViewer.updateComplete;
-  const material = modelViewer.model?.materials[0];
-  if (material) {
-    material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+  function hexToRgba(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = ((bigint >> 16) & 255) / 255;
+    const g = ((bigint >> 8) & 255) / 255;
+    const b = (bigint & 255) / 255;
+    return [r, g, b, 1];
   }
-}
 
-// اعمال رنگ
-colorCircles.forEach(circle => {
-  circle.addEventListener("click", () => {
-    colorCircles.forEach(c => c.classList.remove("selected"));
-    circle.classList.add("selected");
-    const selectedColor = circle.getAttribute("data-color");
-    changeColor(selectedColor);
+  async function changeColor(colorName) {
+    const hex = colorMap[colorName];
+    const rgba = hexToRgba(hex);
+    await modelViewer.updateComplete;
+    const material = modelViewer.model?.materials[0];
+    if (material) {
+      material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+    }
+  }
+
+  function createTextTexture(text) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext("2d");
+
+    // Background transparent
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.font = "bold 48px Vazirmatn";
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+    return canvas;
+  }
+
+  async function applyTextToModel(text) {
+    await modelViewer.updateComplete;
+    const material = modelViewer.model?.materials[0];
+    if (material) {
+      const canvas = createTextTexture(text);
+      const texture = await modelViewer.createTexture(canvas);
+      material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+    }
+  }
+
+  colorCircles.forEach(circle => {
+    circle.addEventListener("click", () => {
+      colorCircles.forEach(c => c.classList.remove("selected"));
+      circle.classList.add("selected");
+      const selectedColor = circle.getAttribute("data-color");
+      changeColor(selectedColor);
+    });
   });
-});
 
-// اعمال متن واقعی
-applyTextBtn.addEventListener("click", async () => {
-  const text = textInput.value.trim();
-  if (!text) return;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 512;
-  const ctx = canvas.getContext("2d");
-
-  // پس‌زمینه شفاف یا رنگ اولیه
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // تنظیمات متن
-  ctx.fillStyle = "#000000";
-  ctx.font = "bold 48px Vazirmatn";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-  const texture = await modelViewer.createTexture(canvas);
-  await modelViewer.updateComplete;
-  const material = modelViewer.model?.materials[0];
-  if (material) {
-    material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
-  }
-});
+  applyTextBtn.addEventListener("click", () => {
+    const text = textInput.value.trim();
+    if (text) {
+      applyTextToModel(text);
+    }
+  });
 </script>
