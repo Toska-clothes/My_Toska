@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>هودی زنانه | متن دینامیک</title>
+  <title>هودی زنانه | نمایش سه‌بعدی</title>
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
       background-color: #f3f1e0;
+      color: #3e2723;
       text-align: center;
       padding: 20px;
     }
@@ -61,10 +62,8 @@
     import { OrbitControls } from 'https://cdn.skypack.dev/three/examples/jsm/controls/OrbitControls.js';
 
     let scene, camera, renderer, controls, hoodieMesh, baseMaterial;
-
     const canvasTex = new THREE.CanvasTexture(createTextCanvas(''));
     canvasTex.flipY = false;
-    baseMaterial = new THREE.MeshStandardMaterial({ map: canvasTex });
 
     init();
     loadModel();
@@ -98,7 +97,7 @@
           hoodieMesh = gltf.scene;
           hoodieMesh.traverse(child => {
             if (child.isMesh) {
-              child.material = baseMaterial;
+              child.material = new THREE.MeshStandardMaterial({ map: canvasTex });
             }
           });
           scene.add(hoodieMesh);
@@ -112,7 +111,7 @@
 
     function animate() {
       requestAnimationFrame(animate);
-      controls.update(); // برای کنترل‌های چرخشی
+      controls.update();
       renderer.render(scene, camera);
     }
 
@@ -145,7 +144,13 @@
         document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
         circle.classList.add('selected');
         const color = circle.getAttribute('data-color');
-        baseMaterial.color.set(color);
+        if (hoodieMesh) {
+          hoodieMesh.traverse(child => {
+            if (child.isMesh) {
+              child.material.color.set(color);
+            }
+          });
+        }
       });
     });
   </script>
