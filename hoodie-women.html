@@ -73,7 +73,7 @@
       scene = new THREE.Scene();
       scene.background = new THREE.Color('#f3f1e0');
 
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
       camera.position.set(0, 1.5, 3);
 
       renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -91,20 +91,28 @@
 
     function loadModel() {
       const loader = new GLTFLoader();
-      loader.load('hoodie.glb', gltf => {
-        hoodieMesh = gltf.scene;
-        hoodieMesh.traverse(child => {
-          if (child.isMesh) {
-            child.material = baseMaterial;
-          }
-        });
-        scene.add(hoodieMesh);
-      });
+      loader.load(
+        'hoodie.glb', // مسیر فایل GLB
+        gltf => {
+          console.log("مدل GLB با موفقیت بارگذاری شد");
+          hoodieMesh = gltf.scene;
+          hoodieMesh.traverse(child => {
+            if (child.isMesh) {
+              child.material = baseMaterial;
+            }
+          });
+          scene.add(hoodieMesh);
+        },
+        undefined, // برای پیشرفت بارگذاری
+        error => {
+          console.error("خطا در بارگذاری مدل:", error);
+        }
+      );
     }
 
     function animate() {
       requestAnimationFrame(animate);
-      controls.update();
+      controls.update(); // برای کنترل‌های چرخشی
       renderer.render(scene, camera);
     }
 
