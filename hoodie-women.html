@@ -8,67 +8,99 @@
       background-color: #f5f7dd;
       font-family: sans-serif;
       text-align: center;
+      direction: rtl;
+    }
+    #canvas-container {
+      width: 100%;
+      height: 500px;
+      margin: 0 auto;
     }
     canvas {
       display: block;
       margin: 0 auto;
       border-radius: 20px;
     }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
   <h2>هودی زنانه</h2>
-  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
-  <div>
-    <input type="color" id="colorPicker" />
-    <input type="text" id="textInput" placeholder="مثلاً توسکا" />
-    <button onclick="applyText()">اعمال متن</button>
-  </div>
-  <div id="viewer" style="height: 500px;"></div>
+  <p>رنگ و متن دلخواهت رو انتخاب کن:</p>
 
+  <input type="color" id="colorPicker" value="#000000" />
+  <input type="text" id="textInput" placeholder="مثلاً توسکا" />
+  <button onclick="applyText()">اعمال</button>
+
+  <div id="canvas-container"></div>
+
+  <!-- Three.js و ماژول‌های موردنیاز -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+
   <script>
     let scene = new THREE.Scene();
-    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / 500, 0.1, 1000);
+    let camera = new THREE.PerspectiveCamera(45, window.innerWidth / 500, 0.1, 100);
+    camera.position.set(0, 1.5, 3);
+
     let renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth * 0.8, 500);
-    document.getElementById("viewer").appendChild(renderer.domElement);
+    renderer.setSize(window.innerWidth * 0.9, 500);
+    document.getElementById("canvas-container").appendChild(renderer.domElement);
 
     let controls = new THREE.OrbitControls(camera, renderer.domElement);
-    camera.position.z = 2;
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.2));
+    scene.background = new THREE.Color('#f5f7dd');
 
-    let light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-    scene.add(light);
+    let model, originalMaterial;
 
-    let loader = new THREE.GLTFLoader();
-    let model;
-
+    const loader = new THREE.GLTFLoader();
     loader.load(
       'https://cdn.jsdelivr.net/gh/Toska-clothes/My_Toska@main/file-HiVKnTH6D1kEgZQDQqyyak.glb',
       function (gltf) {
         model = gltf.scene;
         model.scale.set(1, 1, 1);
         scene.add(model);
+        model.traverse((child) => {
+          if (child.isMesh && !originalMaterial) {
+            originalMaterial = child.material;
+          }
+        });
       },
       undefined,
       function (error) {
-        console.error('Error loading GLB model:', error);
+        console.error('خطا در بارگذاری مدل:', error);
       }
     );
 
     function applyText() {
-      const text = document.getElementById('textInput').value;
       const color = document.getElementById('colorPicker').value;
+      const text = document.getElementById('textInput').value;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 40px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+      const texture = new THREE.CanvasTexture(canvas);
+      const textMaterial = new THREE.MeshStandardMaterial({ map: texture });
 
       if (model) {
         model.traverse((child) => {
           if (child.isMesh) {
-            child.material.color.set(color);
+            child.material = textMaterial;
           }
         });
-        console.log("Text for later use:", text); // اگر خواستی روی مدل حک شه باید از تکسچر استفاده کنی
       }
     }
 
