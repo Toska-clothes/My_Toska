@@ -2,23 +2,38 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <title>هودی زنانه | چسباندن متن</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>هودی زنانه | نمایش سه‌بعدی</title>
+
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      text-align: center;
       background-color: #f3f1e0;
-      padding: 20px;
       color: #3e2723;
+      text-align: center;
+      padding: 20px;
     }
+
+    h1 {
+      font-size: 2.2rem;
+    }
+
+    .model-container {
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
+    }
+
     model-viewer {
       width: 100%;
-      height: 500px;
+      height: 100%;
       background: #fff;
       border-radius: 20px;
     }
+
     .hotspot {
       transform: translate(-50%, -50%);
       pointer-events: none;
@@ -28,21 +43,50 @@
       border-radius: 10px;
       font-weight: bold;
       white-space: nowrap;
-      font-family: 'Vazirmatn', sans-serif;
       font-size: 16px;
+      font-family: 'Vazirmatn', sans-serif;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      display: none;
     }
-    .controls {
-      margin-top: 20px;
+
+    .options-container {
+      margin-top: 30px;
     }
-    input {
+
+    .label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+
+    .color-picker {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .color-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      cursor: pointer;
+    }
+
+    .color-circle.selected {
+      border: 3px solid #000;
+    }
+
+    input[type="text"] {
       padding: 10px;
-      font-size: 1rem;
       border-radius: 8px;
       border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-bottom: 10px;
       width: 200px;
-      margin-left: 10px;
     }
+
     button {
       padding: 10px 20px;
       font-size: 1rem;
@@ -54,59 +98,101 @@
     }
   </style>
 </head>
+
 <body>
-
   <h1>هودی زنانه</h1>
-  <p>متن دلخواهت رو بنویس، بعد روی مدل کلیک کن تا متن اونجا بچسبه.</p>
+  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
 
-  <model-viewer id="hoodieModel"
-                src="hoodie.glb"
-                alt="هودی سه‌بعدی"
-                camera-controls
-                auto-rotate
-                ar
-                interaction-prompt="none"
-                exposure="1"
-                shadow-intensity="1">
-    <div id="hotspotText" slot="hotspot" class="hotspot" style="display: none;">
-      متن تستی
+  <div class="model-container">
+    <model-viewer id="hoodieModel"
+                  src="hoodie.glb"
+                  alt="هودی سه‌بعدی"
+                  auto-rotate
+                  camera-controls
+                  ar
+                  exposure="1"
+                  shadow-intensity="1"
+                  interaction-prompt="none">
+      <div id="hotspotText" slot="hotspot" class="hotspot">متن تستی</div>
+    </model-viewer>
+  </div>
+
+  <div class="options-container">
+    <label class="label">رنگ:</label>
+    <div class="color-picker">
+      <div class="color-circle" data-color="red" style="background-color: red;"></div>
+      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
+      <div class="color-circle" data-color="black" style="background-color: black;"></div>
+      <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
     </div>
-  </model-viewer>
 
-  <div class="controls">
-    <input type="text" id="textInput" placeholder="مثلاً توسکا" />
+    <label class="label">متن دلخواه:</label>
+    <input type="text" id="textInput" placeholder="مثلاً توسکا">
     <button id="applyText">اعمال متن</button>
   </div>
 
   <script>
-    const modelViewer = document.getElementById('hoodieModel');
-    const hotspot = document.getElementById('hotspotText');
-    const textInput = document.getElementById('textInput');
-    const applyText = document.getElementById('applyText');
+    const modelViewer = document.getElementById("hoodieModel");
+    const colorCircles = document.querySelectorAll(".color-circle");
+    const textInput = document.getElementById("textInput");
+    const applyTextBtn = document.getElementById("applyText");
+    const hotspot = document.getElementById("hotspotText");
 
-    // به‌روزرسانی متن
-    applyText.addEventListener('click', () => {
+    const colorMap = {
+      red: "#ff0000",
+      blue: "#0000ff",
+      black: "#000000",
+      white: "#ffffff"
+    };
+
+    function hexToRgba(hex) {
+      const bigint = parseInt(hex.slice(1), 16);
+      const r = ((bigint >> 16) & 255) / 255;
+      const g = ((bigint >> 8) & 255) / 255;
+      const b = (bigint & 255) / 255;
+      return [r, g, b, 1];
+    }
+
+    async function changeColor(colorName) {
+      const hex = colorMap[colorName];
+      const rgba = hexToRgba(hex);
+      await modelViewer.updateComplete;
+      const material = modelViewer.model?.materials[0];
+      if (material) {
+        material.pbrMetallicRoughness.setBaseColorFactor(rgba);
+      }
+    }
+
+    colorCircles.forEach(circle => {
+      circle.addEventListener("click", () => {
+        colorCircles.forEach(c => c.classList.remove("selected"));
+        circle.classList.add("selected");
+        const selectedColor = circle.getAttribute("data-color");
+        changeColor(selectedColor);
+      });
+    });
+
+    applyTextBtn.addEventListener("click", () => {
       const text = textInput.value.trim();
       if (text) {
         hotspot.textContent = text;
+        hotspot.style.display = "block";
       }
     });
 
-    // با کلیک روی مدل، موقعیت جدید متن مشخص شود
-    modelViewer.addEventListener('click', async (event) => {
+    modelViewer.addEventListener("click", async (event) => {
       const rect = modelViewer.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
       const hit = await modelViewer.positionAndNormalFromPoint(x, y);
       if (hit) {
-        const {position, normal} = hit;
-        hotspot.setAttribute('data-position', `${position.x} ${position.y} ${position.z}`);
-        hotspot.setAttribute('data-normal', `${normal.x} ${normal.y} ${normal.z}`);
-        hotspot.style.display = 'block';
+        const { position, normal } = hit;
+        hotspot.setAttribute("data-position", `${position.x} ${position.y} ${position.z}`);
+        hotspot.setAttribute("data-normal", `${normal.x} ${normal.y} ${normal.z}`);
+        hotspot.style.display = "block";
       }
     });
   </script>
-
 </body>
 </html>
