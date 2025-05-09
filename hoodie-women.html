@@ -49,14 +49,15 @@
     <!-- استفاده از model-viewer -->
     <model-viewer
       id="hoodieModel"
-      src="hoodie.glb"
+      src="hoodie.glb" <!-- مسیر فایل سه‌بعدی -->
       alt="هودی سه‌بعدی"
       auto-rotate
       camera-controls
       ar
       exposure="1"
       shadow-intensity="1"
-      interaction-prompt="none">
+      interaction-prompt="none"
+      on-error="console.log('خطا در بارگذاری مدل')">
     </model-viewer>
 
     <!-- لایه متن که به عنوان یک رویه اضافه میشه -->
