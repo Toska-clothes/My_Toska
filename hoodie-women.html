@@ -2,12 +2,12 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8">
-  <title>هودی سه‌بعدی با متن</title>
+  <title>هودی سه‌بعدی</title>
   <style>
     body {
       margin: 0;
       background: #f3f1e0;
-      font-family: 'Vazirmatn', sans-serif;
+      font-family: sans-serif;
       text-align: center;
     }
     canvas { display: block; }
@@ -76,10 +76,12 @@
       const controls = new OrbitControls(camera, renderer.domElement);
 
       const loader = new GLTFLoader();
-      loader.load('file-HiVKnTH6D1kEgZQDQqyyak.glb', gltf => {
+      loader.load('https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/file-HiVKnTH6D1kEgZQDQqyyak.glb', gltf => {
         model = gltf.scene;
         model.scale.set(1, 1, 1);
         scene.add(model);
+      }, undefined, err => {
+        console.error('Error loading model:', err);
       });
 
       animate();
