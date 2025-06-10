@@ -1,144 +1,58 @@
+در این نسخه از کد، حذف کردیم `textEl` به‌عنوان المان HTML روی صفحه و به‌جای آن با استفاده از یک `<canvas>` متن را روی بافت (texture) هودی می‌کشیم و آن را به متریال اول مدل اعمال می‌کنیم.  
+
+```html
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | سه‌بعدی</title>
+  <meta charset="UTF-8">
+  <title>Hoodie Customizer</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Vazirmatn', sans-serif;
-      background-color: #f3f1e0;
-      color: #3e2723;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 { font-size: 2.2rem; }
-    .model-container {
-      margin: 20px auto;
-      max-width: 600px;
-      height: 500px;
-    }
-    model-viewer {
-      width: 100%;
-      height: 100%;
-      background: #fff;
-      border-radius: 20px;
-    }
-    .options-container {
-      margin-top: 30px;
-    }
-    .label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
-    .color-picker {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .color-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      cursor: pointer;
-    }
-    .color-circle.selected {
-      border: 3px solid #000;
-    }
-    input[type="text"] {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      margin-bottom: 10px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #795548;
-      color: #fff;
-      cursor: pointer;
-    }
-    .hotspot {
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-      white-space: nowrap;
-      font-family: Vazirmatn, sans-serif;
-      background: white;
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-weight: bold;
-      display: none;
-    }
+    model-viewer { width: 100%; height: 600px; }
+    .colors { display: flex; gap: 10px; margin: 20px 0; }
+    .color-circle { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; }
+    .color-circle.selected { border-color: #000; }
+    #controls { margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
+  <model-viewer id="mv" 
+                src="hoodie.glb" 
+                camera-controls 
+                shadow-intensity="1" 
+                exposure="1">
+  </model-viewer>
 
-  <div class="model-container">
-    <model-viewer id="hoodieModel"
-      src="hoodie.glb"
-      alt="هودی سه‌بعدی"
-      auto-rotate
-      camera-controls
-      ar
-      exposure="1"
-      shadow-intensity="1"
-      interaction-prompt="none"
-      style="width: 100%; height: 500px;">
-      <div id="floatingText" slot="hotspot"
-           class="hotspot"
-           data-position="0 1 0.3"
-           data-normal="0 0 1">
-        متن دلخواه
-      </div>
-    </model-viewer>
+  <div class="colors">
+    <div class="color-circle" data-color="red" style="background:red"></div>
+    <div class="color-circle" data-color="green" style="background:green"></div>
+    <div class="color-circle" data-color="blue" style="background:blue"></div>
   </div>
 
-  <div class="options-container">
-    <label class="label">رنگ:</label>
-    <div class="color-picker">
-      <div class="color-circle" data-color="red" style="background-color: red;"></div>
-      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
-      <div class="color-circle" data-color="black" style="background-color: black;"></div>
-      <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
-    </div>
-
-    <label class="label">متن دلخواه:</label>
-    <input type="text" id="textInput" placeholder="مثلاً توسکا" />
-    <button id="applyText">اعمال متن</button>
+  <div id="controls">
+    <input type="text" id="text-input" placeholder="متن شما" />
+    <button id="apply-text">اعمال متن روی هودی</button>
   </div>
 
   <script>
-    const modelViewer = document.getElementById("hoodieModel");
-    const colorCircles = document.querySelectorAll(".color-circle");
-    const textInput = document.getElementById("textInput");
-    const applyTextBtn = document.getElementById("applyText");
-    const textEl = document.getElementById("floatingText");
+    const modelViewer = document.querySelector('#mv');
+    const colorMap = { red: '#ff0000', green: '#00ff00', blue: '#0000ff' };
+    const colorCircles = document.querySelectorAll('.color-circle');
+    const textInput = document.querySelector('#text-input');
+    const applyTextBtn = document.querySelector('#apply-text');
 
-    const colorMap = {
-      red: "#ff0000",
-      blue: "#0000ff",
-      black: "#000000",
-      white: "#ffffff"
-    };
-
+    // تابع کمکی تبدیل HEX به RGBA
     function hexToRgba(hex) {
-      const bigint = parseInt(hex.slice(1), 16);
-      const r = ((bigint >> 16) & 255) / 255;
-      const g = ((bigint >> 8) & 255) / 255;
-      const b = (bigint & 255) / 255;
-      return [r, g, b, 1];
+      const bigint = parseInt(hex.replace('#',''), 16);
+      return [
+        ((bigint >> 16) & 255) / 255,
+        ((bigint >> 8) & 255) / 255,
+        (bigint & 255) / 255,
+        1.0
+      ];
     }
 
+    // تغییر رنگ هودی
     async function changeColor(colorName) {
       const hex = colorMap[colorName];
       const rgba = hexToRgba(hex);
@@ -149,51 +63,53 @@
       }
     }
 
+    // هندل انتخاب رنگ
     colorCircles.forEach(circle => {
       circle.addEventListener("click", () => {
         colorCircles.forEach(c => c.classList.remove("selected"));
         circle.classList.add("selected");
-        const selectedColor = circle.getAttribute("data-color");
-        changeColor(selectedColor);
+        changeColor(circle.getAttribute("data-color"));
       });
     });
 
-    applyTextBtn.addEventListener("click", () => {
+    // اعمال متن روی هودی با استفاده از یک Canvas
+    applyTextBtn.addEventListener("click", async () => {
       const text = textInput.value.trim();
-      if (!text) return;
-      textEl.textContent = text;
-      textEl.style.display = "block";
-    });
+      if (!text) return alert('لطفاً ابتدا متنی وارد کنید.');
 
-    let isDragging = false;
+      // انتخاب اندازه مناسب برای تکسچر
+      const TEX_SIZE = 1024;
+      const canvas = document.createElement('canvas');
+      canvas.width = TEX_SIZE;
+      canvas.height = TEX_SIZE;
+      const ctx = canvas.getContext('2d');
 
-    function handleMove(x, y) {
-      const rect = modelViewer.getBoundingClientRect();
-      const px = x - rect.left;
-      const py = y - rect.top;
-      modelViewer.positionAndNormalFromPoint(px, py).then(hit => {
-        if (hit) {
-          textEl.setAttribute("data-position", `${hit.position.x} ${hit.position.y} ${hit.position.z}`);
-          textEl.setAttribute("data-normal", `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`);
-        }
-      });
-    }
+      // زمینه شفاف
+      ctx.clearRect(0, 0, TEX_SIZE, TEX_SIZE);
 
-    textEl.addEventListener("mousedown", () => { isDragging = true; });
-    textEl.addEventListener("touchstart", () => { isDragging = true; });
+      // تنظیم استایل متن
+      const fontSize = 80;
+      ctx.font = `${fontSize}px sans-serif`;
+      ctx.fillStyle = '#000';               // رنگ متن
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
 
-    window.addEventListener("mouseup", () => { isDragging = false; });
-    window.addEventListener("touchend", () => { isDragging = false; });
+      // قرار دادن متن در مرکز
+      ctx.fillText(text, TEX_SIZE / 2, TEX_SIZE / 2);
 
-    window.addEventListener("mousemove", (event) => {
-      if (isDragging) handleMove(event.clientX, event.clientY);
-    });
-
-    window.addEventListener("touchmove", (event) => {
-      if (isDragging && event.touches.length === 1) {
-        handleMove(event.touches[0].clientX, event.touches[0].clientY);
+      // حالا این canvas را به عنوان BaseColorTexture اعمال می‌کنیم
+      await modelViewer.updateComplete;
+      const material = modelViewer.model?.materials[0];
+      if (material) {
+        material.pbrMetallicRoughness.setBaseColorTexture(canvas);
       }
     });
   </script>
 </body>
 </html>
+```
+
+نکات کلیدی:
+1. با ایجاد یک `canvas` متن را روی آن می‌کشیم.
+2. پس از بارگذاری مدل (`await modelViewer.updateComplete`) با استفاده از API داخلی `<model-viewer>` به‌سادگی `canvas` را به‌عنوان تکسچر متریال هودی ست می‌کنیم.
+3. دیگر نیازی به المان‌های درگ و دراپ بیرونی نیست چرا که متن جزئی از بافت مدل شده است. 
