@@ -1,69 +1,98 @@
-<!DOCTYPE html>
-<html lang="fa">
+<!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | برچسب جدا</title>
+  <title>هودی زنانه | سه‌بعدی با برچسب</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    body { margin:0; padding:0; font-family:'Vazirmatn',sans-serif; text-align:center; background:#f3f1e0; }
-    .wrapper { position:relative; display:inline-block; }
-    model-viewer { width:600px; height:500px; border-radius:20px; background:#fff; }
-    #sticker { position:absolute; top:50px; left:200px; cursor:move; display:none; }
-    .options { margin-top:20px; }
-    .options input, .options button { font-size:1rem; padding:8px; margin:5px; }
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      background-color: #f3f1e0;
+      color: #3e2723;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 { font-size: 2.2rem; }
+    .wrapper {
+      position: relative;
+      margin: 20px auto;
+      max-width: 600px;
+      height: 500px;
+    }
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      border-radius: 20px;
+    }
+    #sticker {
+      position: absolute;
+      top: 100px;
+      left: 150px;
+      cursor: move;
+      display: none;
+      max-width: 200px;
+      pointer-events: auto;
+    }
+    .options-container {
+      margin-top: 30px;
+    }
+    .label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    .color-picker {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .color-circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      cursor: pointer;
+    }
+    .color-circle.selected {
+      border: 3px solid #000;
+    }
+    input[type="text"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background-color: #795548;
+      color: #fff;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <div class="wrapper">
-    <model-viewer id="mv" src="hoodie.glb" camera-controls ar auto-rotate interaction-prompt="none"></model-viewer>
+  <p>مدل را مشاهده، رنگ را انتخاب و متن را به‌صورت تصویر جداگانه روی مدل قرار دهید:</p>  <div class="wrapper">
+    <model-viewer id="hoodieModel"
+      src="hoodie.glb"
+      alt="هودی سه‌بعدی"
+      auto-rotate
+      camera-controls
+      ar
+      exposure="1"
+      shadow-intensity="1"
+      interaction-prompt="none">
+    </model-viewer>
     <img id="sticker" />
-  </div>
-
-  <div class="options">
-    <input id="txt" type="text" placeholder="متن دلخواه">
-    <button id="btn">اعمال برچسب</button>
-  </div>
-
-  <script>
-    const txt = document.getElementById('txt');
-    const btn = document.getElementById('btn');
-    const sticker = document.getElementById('sticker');
-
-    btn.addEventListener('click', () => {
-      const text = txt.value.trim();
-      if (!text) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 400; canvas.height = 200;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      ctx.font = 'bold 48px Vazirmatn';
-      ctx.fillStyle = 'black';
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(text, canvas.width/2, canvas.height/2);
-
-      sticker.src = canvas.toDataURL('image/png');
-      sticker.style.display = 'block';
-      sticker.draggable = false;
-    });
-
-    // Drag & Drop ساده
-    let isDown = false, startX, startY;
-
-    sticker.addEventListener('mousedown', e => {
-      isDown = true;
-      startX = e.clientX - sticker.offsetLeft;
-      startY = e.clientY - sticker.offsetTop;
-    });
-    window.addEventListener('mousemove', e => {
-      if (!isDown) return;
-      sticker.style.left = (e.clientX - startX) + 'px';
-      sticker.style.top = (e.clientY - startY) + 'px';
-    });
-    window.addEventListener('mouseup', () => isDown = false);
-  </script>
-</body>
-</html>
+  </div>  <div class="options-container">
+    <label class="label">رنگ:</label>
+    <div class="color-picker">
+      <div class="color-circle" data-color="red" style="background-color: red;"></div>
+      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
