@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | پیش‌نمایش چاپ متن</title>
+  <title>هودی زنانه | سه‌بعدی</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
@@ -19,27 +19,12 @@
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
-      position: relative;
     }
     model-viewer {
       width: 100%;
       height: 100%;
       background: #fff;
       border-radius: 20px;
-    }
-    .overlay-text {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: transparent;
-      color: black;
-      font-size: 24px;
-      font-weight: bold;
-      pointer-events: auto;
-      cursor: move;
-      white-space: nowrap;
-      z-index: 10;
     }
     .options-container {
       margin-top: 30px;
@@ -82,11 +67,23 @@
       cursor: pointer;
       margin: 5px;
     }
+    .hotspot {
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      white-space: nowrap;
+      font-family: Vazirmatn, sans-serif;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: bold;
+      display: none;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل به صورت طبیعی مشاهده کنید:</p>
+  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال کنید:</p>
 
   <div class="model-container">
     <model-viewer id="hoodieModel"
@@ -97,9 +94,15 @@
       ar
       exposure="1"
       shadow-intensity="1"
-      interaction-prompt="none">
+      interaction-prompt="none"
+      style="width: 100%; height: 500px;">
+      <div id="floatingText" slot="hotspot"
+           class="hotspot"
+           data-position="0 1 0.3"
+           data-normal="0 0 1">
+        متن دلخواه
+      </div>
     </model-viewer>
-    <div id="floatingText" class="overlay-text" style="display: none;">متن دلخواه</div>
   </div>
 
   <div class="options-container">
@@ -113,7 +116,7 @@
 
     <label class="label">متن دلخواه:</label>
     <input type="text" id="textInput" placeholder="مثلاً توسکا" />
-    <br>
+    <br />
     <button id="applyText">اعمال متن</button>
     <button id="lockText">تثبیت متن</button>
   </div>
@@ -124,7 +127,7 @@
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
     const lockTextBtn = document.getElementById("lockText");
-    const floatingText = document.getElementById("floatingText");
+    const textEl = document.getElementById("floatingText");
 
     const colorMap = {
       red: "#ff0000",
@@ -163,53 +166,44 @@
     applyTextBtn.addEventListener("click", () => {
       const text = textInput.value.trim();
       if (!text) return;
-      floatingText.textContent = text;
-      floatingText.style.display = "block";
+      textEl.textContent = text;
+      textEl.style.display = "block";
+      isLocked = false;
     });
 
-    // Drag support
     let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
+    let isLocked = false;
 
-    floatingText.addEventListener("mousedown", (e) => {
-      if (floatingText.classList.contains("locked")) return;
-      isDragging = true;
-      offsetX = e.offsetX;
-      offsetY = e.offsetY;
+    function handleMove(x, y) {
+      const rect = modelViewer.getBoundingClientRect();
+      const px = x - rect.left;
+      const py = y - rect.top;
+      modelViewer.positionAndNormalFromPoint(px, py).then(hit => {
+        if (hit) {
+          textEl.setAttribute("data-position", `${hit.position.x} ${hit.position.y} ${hit.position.z}`);
+          textEl.setAttribute("data-normal", `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`);
+        }
+      });
+    }
+
+    textEl.addEventListener("mousedown", () => { if (!isLocked) isDragging = true; });
+    textEl.addEventListener("touchstart", () => { if (!isLocked) isDragging = true; });
+
+    window.addEventListener("mouseup", () => { isDragging = false; });
+    window.addEventListener("touchend", () => { isDragging = false; });
+
+    window.addEventListener("mousemove", (event) => {
+      if (isDragging && !isLocked) handleMove(event.clientX, event.clientY);
     });
 
-    window.addEventListener("mouseup", () => isDragging = false);
-
-    window.addEventListener("mousemove", (e) => {
-      if (isDragging) {
-        floatingText.style.left = `${e.clientX - offsetX}px`;
-        floatingText.style.top = `${e.clientY - offsetY}px`;
-      }
-    });
-
-    // Touch support
-    floatingText.addEventListener("touchstart", (e) => {
-      if (floatingText.classList.contains("locked")) return;
-      isDragging = true;
-      const touch = e.touches[0];
-      offsetX = touch.clientX - floatingText.offsetLeft;
-      offsetY = touch.clientY - floatingText.offsetTop;
-    });
-
-    window.addEventListener("touchend", () => isDragging = false);
-
-    window.addEventListener("touchmove", (e) => {
-      if (isDragging && e.touches.length === 1) {
-        const touch = e.touches[0];
-        floatingText.style.left = `${touch.clientX - offsetX}px`;
-        floatingText.style.top = `${touch.clientY - offsetY}px`;
+    window.addEventListener("touchmove", (event) => {
+      if (isDragging && !isLocked && event.touches.length === 1) {
+        handleMove(event.touches[0].clientX, event.touches[0].clientY);
       }
     });
 
     lockTextBtn.addEventListener("click", () => {
-      floatingText.classList.add("locked");
-      floatingText.style.pointerEvents = "none";
+      isLocked = true;
     });
   </script>
 </body>
