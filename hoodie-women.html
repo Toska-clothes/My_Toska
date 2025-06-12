@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | سه‌بعدی</title>
+  <title>هودی زنانه | سه‌بعدی با متن</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
@@ -15,6 +16,7 @@
     }
     h1 { font-size: 2.2rem; }
     .model-container {
+      position: relative;
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
@@ -24,6 +26,15 @@
       height: 100%;
       background: #fff;
       border-radius: 20px;
+    }
+    #sticker {
+      position: absolute;
+      top: 100px;
+      left: 150px;
+      cursor: move;
+      display: none;
+      max-width: 200px;
+      pointer-events: auto;
     }
     .options-container {
       margin-top: 30px;
@@ -64,25 +75,14 @@
       background-color: #795548;
       color: #fff;
       cursor: pointer;
-      margin: 5px;
-    }
-    .hotspot-text {
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-      white-space: nowrap;
-      font-family: Vazirmatn, sans-serif;
-      background: transparent;
-      padding: 0;
-    }
-    .hotspot-text img {
-      max-width: 150px;
-      pointer-events: auto;
     }
   </style>
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده، رنگ را انتخاب و متن را روی مدل اعمال و تثبیت کنید:</p>  <div class="model-container">
+  <p>مدل را مشاهده، رنگ را انتخاب و متن را به‌صورت تصویر روی مدل قرار دهید:</p>
+
+  <div class="model-container">
     <model-viewer id="hoodieModel"
       src="hoodie.glb"
       alt="هودی سه‌بعدی"
@@ -92,34 +92,30 @@
       exposure="1"
       shadow-intensity="1"
       interaction-prompt="none">
-      <div id="floatingImage" slot="hotspot" class="hotspot-text"
-        data-position="0 1 0.3"
-        data-normal="0 0 1"
-        data-visibility-attribute="visible">
-        <img id="textImage" src="" alt="متن" style="display:none;" />
-      </div>
     </model-viewer>
-  </div>  <div class="options-container">
+    <img id="sticker" />
+  </div>
+
+  <div class="options-container">
     <label class="label">رنگ:</label>
     <div class="color-picker">
       <div class="color-circle" data-color="red" style="background-color: red;"></div>
       <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
       <div class="color-circle" data-color="black" style="background-color: black;"></div>
       <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
-    </div><label class="label">متن دلخواه:</label>
-<input type="text" id="textInput" placeholder="مثلاً توسکا" />
-<br />
-<button id="applyText">اعمال متن</button>
-<button id="fixText">تثبیت متن</button>
+    </div>
 
-  </div>  <script>
+    <label class="label">متن دلخواه:</label>
+    <input type="text" id="textInput" placeholder="مثلاً توسکا" />
+    <button id="applyText">اعمال متن</button>
+  </div>
+
+  <script>
     const modelViewer = document.getElementById("hoodieModel");
-    const textInput = document.getElementById("textInput");
-    const textImage = document.getElementById("textImage");
-    const floatingImage = document.getElementById("floatingImage");
-    const applyTextBtn = document.getElementById("applyText");
-    const fixTextBtn = document.getElementById("fixText");
     const colorCircles = document.querySelectorAll(".color-circle");
+    const textInput = document.getElementById("textInput");
+    const applyTextBtn = document.getElementById("applyText");
+    const sticker = document.getElementById("sticker");
 
     const colorMap = {
       red: "#ff0000",
@@ -155,7 +151,10 @@
       });
     });
 
-    function createTextImage(text) {
+    applyTextBtn.addEventListener("click", () => {
+      const text = textInput.value.trim();
+      if (!text) return;
+
       const canvas = document.createElement("canvas");
       canvas.width = 300;
       canvas.height = 100;
@@ -166,47 +165,47 @@
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-      return canvas.toDataURL("image/png");
-    }
 
-    applyTextBtn.addEventListener("click", () => {
-      const text = textInput.value.trim();
-      if (!text) return;
-      const imageData = createTextImage(text);
-      textImage.src = imageData;
-      textImage.style.display = "block";
+      sticker.src = canvas.toDataURL("image/png");
+      sticker.style.display = "block";
     });
 
     let isDragging = false;
-    let fixed = false;
+    let offsetX, offsetY;
 
-    floatingImage.addEventListener("mousedown", () => { if (!fixed) isDragging = true; });
-    floatingImage.addEventListener("touchstart", () => { if (!fixed) isDragging = true; });
-    window.addEventListener("mouseup", () => { isDragging = false; });
-    window.addEventListener("touchend", () => { isDragging = false; });
-
-    function handleMove(x, y) {
-      if (!modelViewer || fixed) return;
-      const rect = modelViewer.getBoundingClientRect();
-      const px = x - rect.left;
-      const py = y - rect.top;
-      modelViewer.positionAndNormalFromPoint(px, py).then(hit => {
-        if (hit) {
-          floatingImage.setAttribute("data-position", `${hit.position.x} ${hit.position.y} ${hit.position.z}`);
-          floatingImage.setAttribute("data-normal", `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`);
-        }
-      });
-    }
-
-    window.addEventListener("mousemove", e => { if (isDragging) handleMove(e.clientX, e.clientY); });
-    window.addEventListener("touchmove", e => {
-      if (isDragging && e.touches.length === 1) {
-        handleMove(e.touches[0].clientX, e.touches[0].clientY);
-      }
+    // Mouse events
+    sticker.addEventListener("mousedown", e => {
+      isDragging = true;
+      offsetX = e.clientX - sticker.offsetLeft;
+      offsetY = e.clientY - sticker.offsetTop;
     });
 
-    fixTextBtn.addEventListener("click", () => {
-      fixed = true;
+    document.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      sticker.style.left = (e.clientX - offsetX) + "px";
+      sticker.style.top = (e.clientY - offsetY) + "px";
     });
-  </script></body>
+
+    document.addEventListener("mouseup", () => isDragging = false);
+
+    // Touch events
+    sticker.addEventListener("touchstart", e => {
+      isDragging = true;
+      const touch = e.touches[0];
+      offsetX = touch.clientX - sticker.offsetLeft;
+      offsetY = touch.clientY - sticker.offsetTop;
+      e.preventDefault();
+    });
+
+    document.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const touch = e.touches[0];
+      sticker.style.left = (touch.clientX - offsetX) + "px";
+      sticker.style.top = (touch.clientY - offsetY) + "px";
+      e.preventDefault();
+    });
+
+    document.addEventListener("touchend", () => isDragging = false);
+  </script>
+</body>
 </html>
