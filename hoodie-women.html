@@ -14,7 +14,9 @@
       text-align: center;
       padding: 20px;
     }
-    h1 { font-size: 2.2rem; }
+    h1 {
+      font-size: 2.2rem;
+    }
     .model-container {
       margin: 20px auto;
       max-width: 600px;
@@ -70,9 +72,13 @@
       transform: translate(-50%, -50%);
       pointer-events: auto;
       white-space: nowrap;
-      background: transparent;
-      padding: 0;
+      font-family: Vazirmatn, sans-serif;
       display: none;
+    }
+    #textImage {
+      max-width: 200px;
+      user-select: none;
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -91,12 +97,13 @@
       shadow-intensity="1"
       interaction-prompt="none"
       style="width: 100%; height: 500px;">
-
-      <!-- Hotspot برای نمایش متن تصویری -->
-      <div id="textHotspot" slot="hotspot" class="hotspot"
+      
+      <!-- تصویر متن (برچسب جدا) -->
+      <div id="textHotspot" slot="hotspot"
+           class="hotspot"
            data-position="0 1 0.3"
            data-normal="0 0 1">
-        <img id="textImage" src="" alt="متن دلخواه" style="max-width: 200px;" />
+        <img id="textImage" src="" alt="متن تصویری" />
       </div>
     </model-viewer>
   </div>
@@ -120,8 +127,8 @@
     const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
+    const textHotspot = document.getElementById("textHotspot");
     const textImage = document.getElementById("textImage");
-    const hotspot = document.getElementById("textHotspot");
 
     const colorMap = {
       red: "#ff0000",
@@ -129,9 +136,6 @@
       black: "#000000",
       white: "#ffffff"
     };
-
-    let currentTextColor = "#000000"; // پیش‌فرض مشکی
-    let currentFontSize = 48;         // اندازه متن پیش‌فرض
 
     function hexToRgba(hex) {
       const bigint = parseInt(hex.slice(1), 16);
@@ -164,31 +168,25 @@
       const text = textInput.value.trim();
       if (!text) return;
 
-      // ساخت canvas برای ایجاد تصویر از متن
+      // ایجاد تصویر شفاف از متن
       const canvas = document.createElement("canvas");
       canvas.width = 512;
       canvas.height = 256;
       const ctx = canvas.getContext("2d");
 
-      // شفاف‌سازی پس‌زمینه
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // نوشتن متن در وسط تصویر
-      ctx.fillStyle = currentTextColor;
-      ctx.font = `bold ${currentFontSize}px Vazirmatn`;
+      ctx.font = "bold 48px Vazirmatn";
+      ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-      // تبدیل canvas به data URL
       const dataUrl = canvas.toDataURL("image/png");
-
-      // اعمال روی hotspot
       textImage.src = dataUrl;
-      hotspot.style.display = "block";
+      textHotspot.style.display = "block";
     });
 
-    // جابه‌جایی hotspot
+    // حرکت تصویر روی مدل
     let isDragging = false;
 
     function handleMove(x, y) {
@@ -197,14 +195,14 @@
       const py = y - rect.top;
       modelViewer.positionAndNormalFromPoint(px, py).then(hit => {
         if (hit) {
-          hotspot.setAttribute("data-position", `${hit.position.x} ${hit.position.y} ${hit.position.z}`);
-          hotspot.setAttribute("data-normal", `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`);
+          textHotspot.setAttribute("data-position", `${hit.position.x} ${hit.position.y} ${hit.position.z}`);
+          textHotspot.setAttribute("data-normal", `${hit.normal.x} ${hit.normal.y} ${hit.normal.z}`);
         }
       });
     }
 
-    hotspot.addEventListener("mousedown", () => { isDragging = true; });
-    hotspot.addEventListener("touchstart", () => { isDragging = true; });
+    textImage.addEventListener("mousedown", () => { isDragging = true; });
+    textImage.addEventListener("touchstart", () => { isDragging = true; });
 
     window.addEventListener("mouseup", () => { isDragging = false; });
     window.addEventListener("touchend", () => { isDragging = false; });
