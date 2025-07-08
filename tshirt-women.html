@@ -13,31 +13,36 @@
       color: #3e2723;
       text-align: center;
       padding: 20px;
-      direction: rtl;
     }
+
     h1 {
       font-size: 2.2rem;
     }
+
     .model-container {
       position: relative;
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
     }
+
     model-viewer {
       width: 100%;
       height: 100%;
       background: #fff;
       border-radius: 20px;
     }
+
     .options-container {
       margin-top: 30px;
     }
+
     .label {
       display: block;
       margin: 10px 0 5px;
       font-weight: bold;
     }
+
     input[type="text"] {
       padding: 10px;
       border-radius: 8px;
@@ -46,6 +51,7 @@
       margin-bottom: 10px;
       width: 250px;
     }
+
     button {
       padding: 10px 20px;
       font-size: 1rem;
@@ -58,13 +64,12 @@
   </style>
 </head>
 <body>
-
   <h1>تیشرت زنانه</h1>
   <p>مدل را مشاهده کرده، متن دلخواه را وارد و روی تیشرت مشاهده کنید:</p>
 
   <div class="model-container">
     <model-viewer id="shirtModel"
-      src="./assets/tshirt.glb"
+      src="assets/t_shirt.glb"
       alt="تیشرت سه‌بعدی"
       auto-rotate
       camera-controls
@@ -81,7 +86,7 @@
     <button id="applyText">اعمال متن</button>
   </div>
 
-  <script>
+  <script type="module">
     const modelViewer = document.getElementById('shirtModel');
     const textInput = document.getElementById('textInput');
     const applyTextBtn = document.getElementById('applyText');
@@ -92,9 +97,11 @@
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
+      // پس‌زمینه سفید
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // متن وسط
       ctx.fillStyle = "#000000";
       ctx.font = "bold 80px Vazirmatn";
       ctx.textAlign = "center";
@@ -119,6 +126,5 @@
       });
     });
   </script>
-
 </body>
 </html>
