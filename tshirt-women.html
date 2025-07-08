@@ -13,6 +13,7 @@
       color: #3e2723;
       text-align: center;
       padding: 20px;
+      direction: rtl;
     }
     h1 {
       font-size: 2.2rem;
@@ -91,11 +92,9 @@
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
-      // پس‌زمینه سفید
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // متن وسط
       ctx.fillStyle = "#000000";
       ctx.font = "bold 80px Vazirmatn";
       ctx.textAlign = "center";
