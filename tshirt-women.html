@@ -2,49 +2,33 @@
 <html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>تیشرت سه‌بعدی با متن</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background-color: #f4f1e8;
-      color: #333;
       text-align: center;
+      background: #f2f2f2;
       padding: 20px;
       direction: rtl;
     }
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
-    }
-    .model-container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
     model-viewer {
       width: 100%;
+      max-width: 600px;
       height: 500px;
       background: #fff;
       border-radius: 20px;
+      margin: 0 auto;
     }
-    .controls {
-      margin-top: 30px;
-    }
-    input[type="text"] {
+    input, button {
+      margin-top: 20px;
       padding: 10px;
       font-size: 1rem;
       border-radius: 8px;
       border: 1px solid #ccc;
-      width: 200px;
-      margin-bottom: 10px;
     }
     button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      border-radius: 8px;
-      border: none;
       background-color: #795548;
       color: white;
       cursor: pointer;
@@ -52,39 +36,37 @@
   </style>
 </head>
 <body>
-  <h1>تیشرت سه‌بعدی</h1>
-  <p>متن دلخواه را وارد کنید تا روی تیشرت نمایش داده شود:</p>
 
-  <div class="model-container">
-    <model-viewer id="tshirtModel"
-      src="https://toska-clothes.github.io/My_Toska/t_shirt%20(1).glb"
-      alt="مدل تیشرت"
-      ar
-      auto-rotate
-      camera-controls
-      exposure="1"
-      shadow-intensity="1"
-      interaction-prompt="none">
-    </model-viewer>
-  </div>
+  <h1>تیشرت سه‌بعدی با متن دلخواه</h1>
 
-  <div class="controls">
-    <input type="text" id="textInput" placeholder="متن دلخواه..." />
+  <model-viewer id="shirtModel"
+    src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/t_shirt%20(1)%20(1).glb"
+    alt="تیشرت سه‌بعدی"
+    auto-rotate
+    camera-controls
+    exposure="1"
+    shadow-intensity="1"
+    ar
+    interaction-prompt="none">
+  </model-viewer>
+
+  <div>
+    <input type="text" id="textInput" placeholder="متن دلخواه را وارد کنید" />
     <button id="applyText">اعمال متن</button>
   </div>
 
   <script>
-    const modelViewer = document.getElementById('tshirtModel');
+    const modelViewer = document.getElementById('shirtModel');
     const textInput = document.getElementById('textInput');
-    const applyText = document.getElementById('applyText');
+    const applyTextBtn = document.getElementById('applyText');
 
-    function createTextureFromCanvas(text) {
+    function generateTextTexture(text) {
       const canvas = document.createElement('canvas');
       canvas.width = 1024;
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
-      // پس‌زمینه سفید
+      // زمینه سفید
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -98,22 +80,21 @@
       return canvas;
     }
 
-    applyText.addEventListener("click", async () => {
+    applyTextBtn.addEventListener("click", async () => {
       const text = textInput.value.trim();
       if (!text) return;
 
-      await modelViewer.updateComplete;
-      const textureCanvas = createTextureFromCanvas(text);
+      const canvas = generateTextTexture(text);
+      const texture = await modelViewer.createTexture(canvas);
 
-      const texture = await modelViewer.createTexture(textureCanvas);
-      const material = modelViewer.model?.materials[0];
-      if (material) {
-        material.pbrMetallicRoughness.setBaseColorTexture(texture);
-        console.log("متن روی تیشرت اعمال شد.");
-      } else {
-        console.warn("متریال یافت نشد.");
-      }
+      await modelViewer.updateComplete;
+      const materials = modelViewer.model.materials;
+
+      materials.forEach(mat => {
+        mat.pbrMetallicRoughness.setBaseColorTexture(texture);
+      });
     });
   </script>
+
 </body>
 </html>
