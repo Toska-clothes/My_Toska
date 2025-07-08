@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | سه‌بعدی با متن</title>
+  <title>هودی زنانه | بافت سفارشی</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
@@ -16,7 +16,6 @@
     }
     h1 { font-size: 2.2rem; }
     .model-container {
-      position: relative;
       margin: 20px auto;
       max-width: 600px;
       height: 500px;
@@ -27,15 +26,6 @@
       background: #fff;
       border-radius: 20px;
     }
-    #sticker {
-      position: absolute;
-      top: 100px;
-      left: 150px;
-      cursor: move;
-      display: none;
-      max-width: 200px;
-      pointer-events: auto;
-    }
     .options-container {
       margin-top: 30px;
     }
@@ -44,28 +34,13 @@
       margin: 10px 0 5px;
       font-weight: bold;
     }
-    .color-picker {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .color-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      cursor: pointer;
-    }
-    .color-circle.selected {
-      border: 3px solid #000;
-    }
     input[type="text"] {
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 1rem;
       margin-bottom: 10px;
+      width: 200px;
     }
     button {
       padding: 10px 20px;
@@ -80,7 +55,7 @@
 </head>
 <body>
   <h1>هودی زنانه</h1>
-  <p>مدل را مشاهده، رنگ را انتخاب و متن را به‌صورت تصویر روی مدل قرار دهید:</p>
+  <p>متن وارد کنید تا روی بافت مدل هودی نمایش داده شود:</p>
 
   <div class="model-container">
     <model-viewer id="hoodieModel"
@@ -93,18 +68,9 @@
       shadow-intensity="1"
       interaction-prompt="none">
     </model-viewer>
-    <img id="sticker" />
   </div>
 
   <div class="options-container">
-    <label class="label">رنگ:</label>
-    <div class="color-picker">
-      <div class="color-circle" data-color="red" style="background-color: red;"></div>
-      <div class="color-circle" data-color="blue" style="background-color: blue;"></div>
-      <div class="color-circle" data-color="black" style="background-color: black;"></div>
-      <div class="color-circle" data-color="white" style="background-color: white; border: 1px solid #aaa;"></div>
-    </div>
-
     <label class="label">متن دلخواه:</label>
     <input type="text" id="textInput" placeholder="مثلاً توسکا" />
     <button id="applyText">اعمال متن</button>
@@ -112,100 +78,45 @@
 
   <script>
     const modelViewer = document.getElementById("hoodieModel");
-    const colorCircles = document.querySelectorAll(".color-circle");
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
-    const sticker = document.getElementById("sticker");
 
-    const colorMap = {
-      red: "#ff0000",
-      blue: "#0000ff",
-      black: "#000000",
-      white: "#ffffff"
-    };
-
-    function hexToRgba(hex) {
-      const bigint = parseInt(hex.slice(1), 16);
-      const r = ((bigint >> 16) & 255) / 255;
-      const g = ((bigint >> 8) & 255) / 255;
-      const b = (bigint & 255) / 255;
-      return [r, g, b, 1];
+    async function createTextureFromCanvas(canvas) {
+      const bitmap = await createImageBitmap(canvas);
+      const texture = modelViewer.createTexture(bitmap);
+      return texture;
     }
 
-    async function changeColor(colorName) {
-      const hex = colorMap[colorName];
-      const rgba = hexToRgba(hex);
-      await modelViewer.updateComplete;
-      const material = modelViewer.model?.materials[0];
-      if (material) {
-        material.pbrMetallicRoughness.setBaseColorFactor(rgba);
-      }
-    }
-
-    colorCircles.forEach(circle => {
-      circle.addEventListener("click", () => {
-        colorCircles.forEach(c => c.classList.remove("selected"));
-        circle.classList.add("selected");
-        const selectedColor = circle.getAttribute("data-color");
-        changeColor(selectedColor);
-      });
-    });
-
-    applyTextBtn.addEventListener("click", () => {
+    applyTextBtn.addEventListener("click", async () => {
       const text = textInput.value.trim();
       if (!text) return;
 
+      // ساخت canvas با اندازه بافت
       const canvas = document.createElement("canvas");
-      canvas.width = 300;
-      canvas.height = 100;
+      canvas.width = 1024;
+      canvas.height = 1024;
       const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.font = "bold 40px Vazirmatn";
-      ctx.fillStyle = "#000";
+
+      // رنگ زمینه
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // متن در مرکز
+      ctx.font = "bold 80px Vazirmatn";
+      ctx.fillStyle = "#000000";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 
-      sticker.src = canvas.toDataURL("image/png");
-      sticker.style.display = "block";
+      // ساخت بافت از canvas
+      const texture = await createTextureFromCanvas(canvas);
+
+      await modelViewer.updateComplete;
+      const material = modelViewer.model?.materials[0];
+      if (material) {
+        material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
+      }
     });
-
-    let isDragging = false;
-    let offsetX, offsetY;
-
-    // Mouse events
-    sticker.addEventListener("mousedown", e => {
-      isDragging = true;
-      offsetX = e.clientX - sticker.offsetLeft;
-      offsetY = e.clientY - sticker.offsetTop;
-    });
-
-    document.addEventListener("mousemove", e => {
-      if (!isDragging) return;
-      sticker.style.left = (e.clientX - offsetX) + "px";
-      sticker.style.top = (e.clientY - offsetY) + "px";
-    });
-
-    document.addEventListener("mouseup", () => isDragging = false);
-
-    // Touch events
-    sticker.addEventListener("touchstart", e => {
-      isDragging = true;
-      const touch = e.touches[0];
-      offsetX = touch.clientX - sticker.offsetLeft;
-      offsetY = touch.clientY - sticker.offsetTop;
-      e.preventDefault();
-    });
-
-    document.addEventListener("touchmove", e => {
-      if (!isDragging) return;
-      const touch = e.touches[0];
-      sticker.style.left = (touch.clientX - offsetX) + "px";
-      sticker.style.top = (touch.clientY - offsetY) + "px";
-      e.preventDefault();
-    });
-
-    document.addEventListener("touchend", () => isDragging = false);
   </script>
 </body>
 </html>
