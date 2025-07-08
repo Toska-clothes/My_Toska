@@ -57,12 +57,13 @@
   </style>
 </head>
 <body>
+
   <h1>تیشرت زنانه</h1>
   <p>مدل را مشاهده کرده، متن دلخواه را وارد و روی تیشرت مشاهده کنید:</p>
 
   <div class="model-container">
     <model-viewer id="shirtModel"
-      src="assets/t_shirt.glb"
+      src="https://github.com/Toska-clothes/My_Toska/raw/refs/heads/main/t_shirt%20(1)%20(1).glb"
       alt="تیشرت سه‌بعدی"
       auto-rotate
       camera-controls
@@ -90,9 +91,11 @@
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
+      // پس‌زمینه سفید
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+      // متن وسط
       ctx.fillStyle = "#000000";
       ctx.font = "bold 80px Vazirmatn";
       ctx.textAlign = "center";
@@ -117,5 +120,6 @@
       });
     });
   </script>
+
 </body>
 </html>
