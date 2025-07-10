@@ -3,20 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>هودی زنانه | بافت سفارشی</title>
+  <title>هودی سه‌بعدی با متن</title>
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;700&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: 'Vazirmatn', sans-serif;
-      background-color: #f3f1e0;
-      color: #3e2723;
+      background-color: #f9f7f2;
+      color: #333;
       text-align: center;
       padding: 20px;
     }
-    h1 { font-size: 2.2rem; }
     .model-container {
-      margin: 20px auto;
+      margin: auto;
       max-width: 600px;
       height: 500px;
     }
@@ -26,97 +25,86 @@
       background: #fff;
       border-radius: 20px;
     }
-    .options-container {
-      margin-top: 30px;
-    }
-    .label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-    }
-    input[type="text"] {
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      margin-bottom: 10px;
-      width: 200px;
-    }
-    button {
+    input, button {
+      font-family: inherit;
+      margin-top: 10px;
       padding: 10px 20px;
       font-size: 1rem;
       border: none;
-      border-radius: 8px;
-      background-color: #795548;
+      border-radius: 10px;
+    }
+    input {
+      border: 1px solid #ccc;
+      width: 250px;
+    }
+    button {
+      background-color: #4a4a4a;
       color: #fff;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>هودی زنانه</h1>
-  <p>متن وارد کنید تا روی بافت مدل هودی نمایش داده شود:</p>
+
+  <h1>هودی سه‌بعدی</h1>
+  <p>متن دلخواهت را وارد کن و روی هودی ببین:</p>
 
   <div class="model-container">
-    <model-viewer id="hoodieModel"
-      src="hoodie.glb"
+    <model-viewer id="model"
+      src="https://github.com/Toska-clothes/My_Toska/raw/main/hoodie_ready_for_texture.glb"
       alt="هودی سه‌بعدی"
       auto-rotate
       camera-controls
-      ar
       exposure="1"
       shadow-intensity="1"
       interaction-prompt="none">
     </model-viewer>
   </div>
 
-  <div class="options-container">
-    <label class="label">متن دلخواه:</label>
+  <div>
     <input type="text" id="textInput" placeholder="مثلاً توسکا" />
     <button id="applyText">اعمال متن</button>
   </div>
 
   <script>
-    const modelViewer = document.getElementById("hoodieModel");
+    const modelViewer = document.getElementById("model");
     const textInput = document.getElementById("textInput");
     const applyTextBtn = document.getElementById("applyText");
 
-    async function createTextureFromCanvas(canvas) {
-      const bitmap = await createImageBitmap(canvas);
-      const texture = modelViewer.createTexture(bitmap);
-      return texture;
+    function generateTextTexture(text) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext("2d");
+
+      // پس‌زمینه سفید
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // متن وسط
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 80px Vazirmatn";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+      return canvas;
     }
 
     applyTextBtn.addEventListener("click", async () => {
       const text = textInput.value.trim();
       if (!text) return;
 
-      // ساخت canvas با اندازه بافت
-      const canvas = document.createElement("canvas");
-      canvas.width = 1024;
-      canvas.height = 1024;
-      const ctx = canvas.getContext("2d");
-
-      // رنگ زمینه
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // متن در مرکز
-      ctx.font = "bold 80px Vazirmatn";
-      ctx.fillStyle = "#000000";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-      // ساخت بافت از canvas
-      const texture = await createTextureFromCanvas(canvas);
+      const canvas = generateTextTexture(text);
+      const texture = await modelViewer.createTexture(canvas);
 
       await modelViewer.updateComplete;
-      const material = modelViewer.model?.materials[0];
-      if (material) {
-        material.pbrMetallicRoughness.baseColorTexture.setTexture(texture);
-      }
+      const materials = modelViewer.model.materials;
+      materials.forEach(mat => {
+        mat.pbrMetallicRoughness.setBaseColorTexture(texture);
+      });
     });
   </script>
+
 </body>
 </html>
